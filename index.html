@@ -150,6 +150,20 @@ footer{padding:30px 0;color:var(--mute);font-size:.85rem}
   .hero .bgs{grid-template-columns:1fr}
   .hero .bgs div:not(:first-child){display:none}
 }
+
+#gallery .gtabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.ggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px}
+.ggrid button{position:relative;border:0;padding:0;border-radius:10px;overflow:hidden;cursor:zoom-in;aspect-ratio:3/2;background:#223}
+.ggrid img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s}
+.ggrid button:hover img{transform:scale(1.06)}
+.ggrid span{position:absolute;inset-inline:0;bottom:0;padding:14px 6px 4px;font-size:.72rem;color:#fff;background:linear-gradient(to top,rgba(0,0,0,.7),transparent);text-align:start}
+#glb{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;flex-direction:column}
+#glb.on{display:flex}
+#glb img{max-width:94vw;max-height:82vh;object-fit:contain;border-radius:6px}
+#glb .gc{color:#eee;margin-top:10px;font-size:.95rem}
+#glb button{position:absolute;border:0;background:rgba(255,255,255,.15);color:#fff;width:46px;height:46px;border-radius:50%;font-size:24px;cursor:pointer}
+#glb .x{top:14px;left:14px}#glb .p{right:14px;top:50%}#glb .n{left:14px;top:50%}
+@media(max-width:600px){.ggrid{grid-template-columns:repeat(3,1fr);gap:4px}.ggrid span{display:none}}
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -181,7 +195,7 @@ footer{padding:30px 0;color:var(--mute);font-size:.85rem}
 </header>
 
 <nav class="top"><div class="wrap">
-  <a href="#verdict">השורה התחתונה</a><a href="#euro">מפה</a><a href="#picker">מה חשוב לך</a><a href="#dests">היעדים</a><a href="#days">יום אחר יום</a><a href="#table">טבלה</a><a href="#notes">לפני שמחליטים</a>
+  <a href="#verdict">השורה התחתונה</a><a href="#euro">מפה</a><a href="#picker">מה חשוב לך</a><a href="#dests">היעדים</a><a href="#gallery">תמונות</a><a href="#days">יום אחר יום</a><a href="#table">טבלה</a><a href="#notes">לפני שמחליטים</a>
   <button id="themeBtn" aria-label="מצב תצוגה">☀️ / 🌙</button>
 </div></nav>
 
@@ -240,6 +254,14 @@ footer{padding:30px 0;color:var(--mute);font-size:.85rem}
   <div class="dests" id="destList"></div>
 </section>
 
+<section id="gallery">
+  <h2>🖼️ היעדים בתמונות</h2>
+  <p class="sub">40 תמונות לכל יעד, מכל האתרים במסלול. לוחצים על תמונה להגדלה, ובמסמך של כל יעד יש עד 25 תמונות לכל אתר.</p>
+  <div class="gtabs" id="gTabs"></div>
+  <div class="ggrid" id="gGrid"></div>
+</section>
+<div id="glb" role="dialog" aria-modal="true"><button class="x" aria-label="סגירה">✕</button><button class="p" aria-label="הקודמת">›</button><img alt=""><div class="gc"></div><button class="n" aria-label="הבאה">‹</button></div>
+
 <section id="days">
   <h2>יום אחר יום, במסלול המומלץ</h2>
   <p class="sub">בוחרים יעד ורואים את חמשת הימים. 💧 מים · 🚲 אופניים · 🚡 רכבל.</p>
@@ -281,14 +303,12 @@ footer{padding:30px 0;color:var(--mute);font-size:.85rem}
 
 <script>
 const T = u => `https://thumb.wikimedia.org/wikipedia/commons/thumb/${u}`;
+const IMG = {"pl":[["img/poland/lomnicky-01.jpg","הנוף מהפסגה"],["img/poland/morskie-01.jpg","מורסקיה אוקו"],["img/poland/strbske-01.jpg","פופרדסקה פלסו"],["img/poland/dunajec-01.jpg","רפסודות בדונאייץ"],["img/poland/bikepien-01.jpg","רכיבה לאורך הדונאייץ"],["img/poland/velo-01.jpg","שביל Velo Czorsztyn"],["img/poland/niedzica-01.jpg","טירת ניידיצה"],["img/poland/sokolica-01.jpg","טשי קורוני"],["img/poland/koscieliska-01.jpg","עמק קושצ'ליסקה"],["img/poland/gubalowka-01.jpg","פוניקולר גובאלובקה"]],"ro":[["img/romania/transf-01.jpg","כביש טרנספגרשן"],["img/romania/balea-01.jpg","אגם באליה"],["img/romania/vidraru-01.jpg","אגם וידרארו"],["img/romania/poiana-01.jpg","פויאנה בראשוב"],["img/romania/sibiu-01.jpg","אופניים בסיביו"],["img/romania/ebikebran-02.jpg","מויצ'ו בסתיו"],["img/romania/busteni-01.jpg","הספינקס בבוצ'ג'"],["img/romania/bran-01.jpg","טירת בראן"],["img/romania/sfana-01.jpg","אגם הלוע סנטה אנה"],["img/romania/paltinu-01.jpg","אגם פלטינו"]],"oh":[["img/ohrid/loop-01.jpg","רכיבה סביב האגם"],["img/ohrid/galicica-01.jpg","פארק גליצ'יצה"],["img/ohrid/naum-01.jpg","מעיינות סווטי נאום"],["img/ohrid/trpejca-01.jpg","טרפייצה"],["img/ohrid/bones-01.jpg","מפרץ העצמות"],["img/ohrid/ohridold-01.jpg","אוחריד העתיקה"],["img/ohrid/ride_drilon-01.jpg","פוגרדץ"],["img/ohrid/kaneoboat-01.jpg","סירה לקנאו"],["img/ohrid/ride_prespa-01.jpg","סטניה"],["img/ohrid/golemgrad-01.jpg","האי גולם גרד"]]};
+const GALI = {"pl":[{"u":"img/poland/lomnicky-01.jpg","t":"img/poland/t/lomnicky-01.jpg","c":"הנוף מהפסגה"},{"u":"img/poland/morskie-01.jpg","t":"img/poland/t/morskie-01.jpg","c":"מורסקיה אוקו"},{"u":"img/poland/strbske-01.jpg","t":"img/poland/t/strbske-01.jpg","c":"פופרדסקה פלסו"},{"u":"img/poland/dunajec-01.jpg","t":"img/poland/t/dunajec-01.jpg","c":"רפסודות בדונאייץ"},{"u":"img/poland/bikepien-01.jpg","t":"img/poland/t/bikepien-01.jpg","c":"רכיבה לאורך הדונאייץ"},{"u":"img/poland/velo-01.jpg","t":"img/poland/t/velo-01.jpg","c":"שביל Velo Czorsztyn"},{"u":"img/poland/niedzica-01.jpg","t":"img/poland/t/niedzica-01.jpg","c":"טירת ניידיצה"},{"u":"img/poland/sokolica-01.jpg","t":"img/poland/t/sokolica-01.jpg","c":"טשי קורוני"},{"u":"img/poland/koscieliska-01.jpg","t":"img/poland/t/koscieliska-01.jpg","c":"עמק קושצ'ליסקה"},{"u":"img/poland/gubalowka-01.jpg","t":"img/poland/t/gubalowka-01.jpg","c":"פוניקולר גובאלובקה"},{"u":"img/poland/region-tatrypl-01.jpg","t":"img/poland/t/region-tatrypl-01.jpg","c":"הטטרה הסלובקית"},{"u":"img/poland/region-pieniny-01.jpg","t":"img/poland/t/region-pieniny-01.jpg","c":"פייניני"},{"u":"img/poland/region-czorsztyn-01.jpg","t":"img/poland/t/region-czorsztyn-01.jpg","c":"אגם צ'ורשטין והטטרה"},{"u":"img/poland/region-tatrysk-01.jpg","t":"img/poland/t/region-tatrysk-01.jpg","c":"טטרנסקה לומניצה"},{"u":"img/poland/bachledka-01.jpg","t":"img/poland/t/bachledka-01.jpg","c":"שביל צמרות העצים"},{"u":"img/poland/termy-01.jpg","t":"img/poland/t/termy-01.jpg","c":"בריכות חוחולובסקה"},{"u":"img/poland/krakow-01.jpg","t":"img/poland/t/krakow-01.jpg","c":"טירת ואוול"},{"u":"img/poland/wieliczka-01.jpg","t":"img/poland/t/wieliczka-01.jpg","c":"מכרה המלח וייליצ'קה"},{"u":"img/poland/lomnicky-02.jpg","t":"img/poland/t/lomnicky-02.jpg","c":"לומניצקי בסתיו"},{"u":"img/poland/morskie-02.jpg","t":"img/poland/t/morskie-02.jpg","c":"מורסקיה אוקו בסתיו"},{"u":"img/poland/strbske-02.jpg","t":"img/poland/t/strbske-02.jpg","c":"שטרבסקה פלסו"},{"u":"img/poland/dunajec-02.jpg","t":"img/poland/t/dunajec-02.jpg","c":"רפסודות בדונאייץ"},{"u":"img/poland/bikepien-02.jpg","t":"img/poland/t/bikepien-02.jpg","c":"צ'רבני קלאשטור"},{"u":"img/poland/velo-02.jpg","t":"img/poland/t/velo-02.jpg","c":"שביל Velo Czorsztyn"},{"u":"img/poland/niedzica-02.jpg","t":"img/poland/t/niedzica-02.jpg","c":"טירת ניידיצה"},{"u":"img/poland/sokolica-02.jpg","t":"img/poland/t/sokolica-02.jpg","c":"פייניני בסתיו"},{"u":"img/poland/koscieliska-02.jpg","t":"img/poland/t/koscieliska-02.jpg","c":"העמק בסתיו"},{"u":"img/poland/gubalowka-02.jpg","t":"img/poland/t/gubalowka-02.jpg","c":"הנוף מגובאלובקה"},{"u":"img/poland/region-tatrypl-02.jpg","t":"img/poland/t/region-tatrypl-02.jpg","c":"טטרה מזקופנה"},{"u":"img/poland/region-pieniny-02.jpg","t":"img/poland/t/region-pieniny-02.jpg","c":"פייניני בסתיו"},{"u":"img/poland/region-czorsztyn-02.jpg","t":"img/poland/t/region-czorsztyn-02.jpg","c":"אגם צ'ורשטין והטטרה"},{"u":"img/poland/region-tatrysk-02.jpg","t":"img/poland/t/region-tatrysk-02.jpg","c":"הטטרה הסלובקית בסתיו"},{"u":"img/poland/bachledka-02.jpg","t":"img/poland/t/bachledka-02.jpg","c":"שביל צמרות העצים"},{"u":"img/poland/termy-02.jpg","t":"img/poland/t/termy-02.jpg","c":"טרמה באניה"},{"u":"img/poland/krakow-02.jpg","t":"img/poland/t/krakow-02.jpg","c":"טירת ואוול"},{"u":"img/poland/wieliczka-02.jpg","t":"img/poland/t/wieliczka-02.jpg","c":"מכרה המלח וייליצ'קה"},{"u":"img/poland/lomnicky-03.jpg","t":"img/poland/t/lomnicky-03.jpg","c":"הרכבל ללומניצקי שטיט"},{"u":"img/poland/morskie-03.jpg","t":"img/poland/t/morskie-03.jpg","c":"מורסקיה אוקו"},{"u":"img/poland/strbske-03.jpg","t":"img/poland/t/strbske-03.jpg","c":"שטרבסקה פלסו"},{"u":"img/poland/dunajec-03.jpg","t":"img/poland/t/dunajec-03.jpg","c":"הרפסודות בקניון"}],"ro":[{"u":"img/romania/transf-01.jpg","t":"img/romania/t/transf-01.jpg","c":"כביש טרנספגרשן"},{"u":"img/romania/balea-01.jpg","t":"img/romania/t/balea-01.jpg","c":"אגם באליה"},{"u":"img/romania/vidraru-01.jpg","t":"img/romania/t/vidraru-01.jpg","c":"אגם וידרארו"},{"u":"img/romania/poiana-01.jpg","t":"img/romania/t/poiana-01.jpg","c":"פויאנה בראשוב"},{"u":"img/romania/sibiu-01.jpg","t":"img/romania/t/sibiu-01.jpg","c":"אופניים בסיביו"},{"u":"img/romania/ebikebran-02.jpg","t":"img/romania/t/ebikebran-02.jpg","c":"מויצ'ו בסתיו"},{"u":"img/romania/busteni-01.jpg","t":"img/romania/t/busteni-01.jpg","c":"הספינקס בבוצ'ג'"},{"u":"img/romania/bran-01.jpg","t":"img/romania/t/bran-01.jpg","c":"טירת בראן"},{"u":"img/romania/sfana-01.jpg","t":"img/romania/t/sfana-01.jpg","c":"אגם הלוע סנטה אנה"},{"u":"img/romania/paltinu-01.jpg","t":"img/romania/t/paltinu-01.jpg","c":"אגם פלטינו"},{"u":"img/romania/region-fagaras-01.jpg","t":"img/romania/t/region-fagaras-01.jpg","c":"הרי פגרש"},{"u":"img/romania/region-prahova-01.jpg","t":"img/romania/t/region-prahova-01.jpg","c":"הרי בוצ'ג'"},{"u":"img/romania/region-lakes-01.jpg","t":"img/romania/t/region-lakes-01.jpg","c":"אגם בקרפטים בסתיו"},{"u":"img/romania/tampa-01.jpg","t":"img/romania/t/tampa-01.jpg","c":"בראשוב מלמעלה"},{"u":"img/romania/peles-01.jpg","t":"img/romania/t/peles-01.jpg","c":"טירת פלש"},{"u":"img/romania/zarnesti-01.jpg","t":"img/romania/t/zarnesti-01.jpg","c":"רכס פיאטרה קראיולוי"},{"u":"img/romania/lacurosu-01.jpg","t":"img/romania/t/lacurosu-01.jpg","c":"ערוץ ביקאז"},{"u":"img/romania/urlatoarea-01.jpg","t":"img/romania/t/urlatoarea-01.jpg","c":"מפל אורלטוארה"},{"u":"img/romania/sighisoara-01.jpg","t":"img/romania/t/sighisoara-01.jpg","c":"סיגישוארה"},{"u":"img/romania/region-saxon-01.jpg","t":"img/romania/t/region-saxon-01.jpg","c":"הכנסייה המבוצרת בביירטן"},{"u":"img/romania/transf-02.jpg","t":"img/romania/t/transf-02.jpg","c":"הסרפנטינות מלמעלה"},{"u":"img/romania/balea-02.jpg","t":"img/romania/t/balea-02.jpg","c":"הרכבל לבאליה לאק"},{"u":"img/romania/vidraru-02.jpg","t":"img/romania/t/vidraru-02.jpg","c":"וידרארו בסתיו"},{"u":"img/romania/poiana-02.jpg","t":"img/romania/t/poiana-02.jpg","c":"פויאנה בראשוב"},{"u":"img/romania/sibiu-02.jpg","t":"img/romania/t/sibiu-02.jpg","c":"העיר העתיקה בסיביו"},{"u":"img/romania/ebikebran-03.jpg","t":"img/romania/t/ebikebran-03.jpg","c":"רכיבה בטרנסילבניה"},{"u":"img/romania/busteni-02.jpg","t":"img/romania/t/busteni-02.jpg","c":"צלב קרימן"},{"u":"img/romania/bran-02.jpg","t":"img/romania/t/bran-02.jpg","c":"בראן מלמעלה"},{"u":"img/romania/sfana-02.jpg","t":"img/romania/t/sfana-02.jpg","c":"ביצת מוהוש"},{"u":"img/romania/paltinu-02.jpg","t":"img/romania/t/paltinu-02.jpg","c":"עמק דופטנה"},{"u":"img/romania/region-fagaras-02.jpg","t":"img/romania/t/region-fagaras-02.jpg","c":"הרי פגרש"},{"u":"img/romania/region-prahova-02.jpg","t":"img/romania/t/region-prahova-02.jpg","c":"הרי בוצ'ג'"},{"u":"img/romania/region-lakes-02.jpg","t":"img/romania/t/region-lakes-02.jpg","c":"אגם בקרפטים בסתיו"},{"u":"img/romania/tampa-02.jpg","t":"img/romania/t/tampa-02.jpg","c":"כיכר המועצה"},{"u":"img/romania/peles-02.jpg","t":"img/romania/t/peles-02.jpg","c":"האולמות בפנים"},{"u":"img/romania/zarnesti-02.jpg","t":"img/romania/t/zarnesti-02.jpg","c":"ערוץ זרנשט"},{"u":"img/romania/lacurosu-02.jpg","t":"img/romania/t/lacurosu-02.jpg","c":"לאקול רושו"},{"u":"img/romania/urlatoarea-02.jpg","t":"img/romania/t/urlatoarea-02.jpg","c":"מפל אורלטוארה"},{"u":"img/romania/sighisoara-02.jpg","t":"img/romania/t/sighisoara-02.jpg","c":"סיגישוארה"},{"u":"img/romania/region-saxon-02.jpg","t":"img/romania/t/region-saxon-02.jpg","c":"הכפר ויסקרי"}],"oh":[{"u":"img/ohrid/loop-01.jpg","t":"img/ohrid/t/loop-01.jpg","c":"רכיבה סביב האגם"},{"u":"img/ohrid/galicica-01.jpg","t":"img/ohrid/t/galicica-01.jpg","c":"פארק גליצ'יצה"},{"u":"img/ohrid/naum-01.jpg","t":"img/ohrid/t/naum-01.jpg","c":"מעיינות סווטי נאום"},{"u":"img/ohrid/trpejca-01.jpg","t":"img/ohrid/t/trpejca-01.jpg","c":"טרפייצה"},{"u":"img/ohrid/bones-01.jpg","t":"img/ohrid/t/bones-01.jpg","c":"מפרץ העצמות"},{"u":"img/ohrid/ohridold-01.jpg","t":"img/ohrid/t/ohridold-01.jpg","c":"אוחריד העתיקה"},{"u":"img/ohrid/ride_drilon-01.jpg","t":"img/ohrid/t/ride_drilon-01.jpg","c":"פוגרדץ"},{"u":"img/ohrid/kaneoboat-01.jpg","t":"img/ohrid/t/kaneoboat-01.jpg","c":"סירה לקנאו"},{"u":"img/ohrid/ride_prespa-01.jpg","t":"img/ohrid/t/ride_prespa-01.jpg","c":"סטניה"},{"u":"img/ohrid/golemgrad-01.jpg","t":"img/ohrid/t/golemgrad-01.jpg","c":"האי גולם גרד"},{"u":"img/ohrid/region-old-01.jpg","t":"img/ohrid/t/region-old-01.jpg","c":"אוחריד"},{"u":"img/ohrid/region-east-01.jpg","t":"img/ohrid/t/region-east-01.jpg","c":"האגם מגליצ'יצה"},{"u":"img/ohrid/region-al-01.jpg","t":"img/ohrid/t/region-al-01.jpg","c":"פוגרדץ"},{"u":"img/ohrid/mavrovo-01.jpg","t":"img/ohrid/t/mavrovo-01.jpg","c":"הכנסייה השקועה"},{"u":"img/ohrid/bovilla-01.jpg","t":"img/ohrid/t/bovilla-01.jpg","c":"אגם בובילה"},{"u":"img/ohrid/ride_promenade-01.jpg","t":"img/ohrid/t/ride_promenade-01.jpg","c":"הטיילת באוחריד"},{"u":"img/ohrid/lin-01.jpg","t":"img/ohrid/t/lin-01.jpg","c":"הכפר לין"},{"u":"img/ohrid/struga-01.jpg","t":"img/ohrid/t/struga-01.jpg","c":"סטרוגה והדרין השחור"},{"u":"img/ohrid/vevcani-02.jpg","t":"img/ohrid/t/vevcani-02.jpg","c":"מעיינות ווצ'אני"},{"u":"img/ohrid/region-prespa-01.jpg","t":"img/ohrid/t/region-prespa-01.jpg","c":"פרספה בסתיו"},{"u":"img/ohrid/loop-02.jpg","t":"img/ohrid/t/loop-02.jpg","c":"רכיבה סביב האגם"},{"u":"img/ohrid/galicica-02.jpg","t":"img/ohrid/t/galicica-02.jpg","c":"רכיבה בגליצ'יצה"},{"u":"img/ohrid/naum-02.jpg","t":"img/ohrid/t/naum-02.jpg","c":"מנזר סווטי נאום"},{"u":"img/ohrid/trpejca-02.jpg","t":"img/ohrid/t/trpejca-02.jpg","c":"קיאק בטרפייצה"},{"u":"img/ohrid/bones-02.jpg","t":"img/ohrid/t/bones-02.jpg","c":"מפרץ העצמות"},{"u":"img/ohrid/ohridold-02.jpg","t":"img/ohrid/t/ohridold-02.jpg","c":"מבצר שמואל"},{"u":"img/ohrid/ride_drilon-02.jpg","t":"img/ohrid/t/ride_drilon-02.jpg","c":"רכיבה בחוף האלבני"},{"u":"img/ohrid/kaneoboat-02.jpg","t":"img/ohrid/t/kaneoboat-02.jpg","c":"הסירות בנמל אוחריד"},{"u":"img/ohrid/ride_prespa-02.jpg","t":"img/ohrid/t/ride_prespa-02.jpg","c":"רכיבה בפרספה"},{"u":"img/ohrid/golemgrad-02.jpg","t":"img/ohrid/t/golemgrad-02.jpg","c":"אגם פרספה"},{"u":"img/ohrid/region-old-02.jpg","t":"img/ohrid/t/region-old-02.jpg","c":"אוחריד"},{"u":"img/ohrid/region-east-02.jpg","t":"img/ohrid/t/region-east-02.jpg","c":"האגם מגליצ'יצה"},{"u":"img/ohrid/region-al-02.jpg","t":"img/ohrid/t/region-al-02.jpg","c":"החוף האלבני"},{"u":"img/ohrid/mavrovo-02.jpg","t":"img/ohrid/t/mavrovo-02.jpg","c":"אגם מאברובו בסתיו"},{"u":"img/ohrid/bovilla-02.jpg","t":"img/ohrid/t/bovilla-02.jpg","c":"אגם בובילה"},{"u":"img/ohrid/ride_promenade-02.jpg","t":"img/ohrid/t/ride_promenade-02.jpg","c":"אופניים לאורך האגם"},{"u":"img/ohrid/lin-02.jpg","t":"img/ohrid/t/lin-02.jpg","c":"חצי האי לין"},{"u":"img/ohrid/struga-02.jpg","t":"img/ohrid/t/struga-02.jpg","c":"סטרוגה והדרין השחור"},{"u":"img/ohrid/vevcani-03.jpg","t":"img/ohrid/t/vevcani-03.jpg","c":"מעיינות ווצ'אני"},{"u":"img/ohrid/region-prespa-02.jpg","t":"img/ohrid/t/region-prespa-02.jpg","c":"פרספה בסתיו"}]};
 const D = [
  {id:'pl',c:'var(--pl)',flag:'🇵🇱',name:'דרום פולין',sub:'טטרה, פייניני וקפיצה לסלובקיה',doc:'plan-poland-south.html',
   one:'הרכבל ל-Lomnický, מורסקיה אוקו, רפסודות בקניון ואופניים לאורך הנהר.',
-  imgs:[
-   [T('d/df/Image-Lomnicky_stit_from_Slavkovsky_stit_2.jpg/960px-Image-Lomnicky_stit_from_Slavkovsky_stit_2.jpg'),'לומניצקי שטיט, 2,634 מ\''],
-   [T('4/4d/20181006_Morskie_Oko_0905_9902_DxO.jpg/960px-20181006_Morskie_Oko_0905_9902_DxO.jpg'),'מורסקיה אוקו'],
-   [T('5/5d/Rafting_on_the_Dunajec_River.jpg/960px-Rafting_on_the_Dunajec_River.jpg'),'רפסודות בדונאייץ'],
-   [T('c/c6/Dunajec_-_Droga_Pieninska_01.jpg/960px-Dunajec_-_Droga_Pieninska_01.jpg'),'אופניים בדרך הפיינינית']],
+  imgs:IMG.pl,
   flight:{price:134,air:'ויז, ישיר',out:'11:05→13:50',back:'05:40→09:55',land:'09:55',ap:'קרקוב'},
   total:[2951,4071],car:'≈ 375–504 ₪',km:570,
   scores:{mount:5,water:4,bike:3,cable:4,price:5,drive:4,sure:4},
@@ -306,13 +326,7 @@ const D = [
    ['ה\' 22','טירה → קרקוב','טירת ניידיצה מעל האגם, ערב בקרקוב','💧']]},
  {id:'ro',c:'var(--ro)',flag:'🇷🇴',name:'טרנסילבניה',sub:'הקרפטים, טרנספגרשן ואגמי הרים',doc:'plan-romania.html',
   one:'הכביש ההררי, אגם באליה, רכבל באבלה, אגם הלוע ואופניים חשמליים מבראן.',
-  imgs:[
-   [T('1/1f/Lake_B%C3%A2lea_and_the_Transf%C4%83g%C4%83r%C4%83%C5%9Fan_road.jpg/960px-Lake_B%C3%A2lea_and_the_Transf%C4%83g%C4%83r%C4%83%C5%9Fan_road.jpg'),'אגם באליה והכביש'],
-   [T('7/79/Panoram%C4%83_Transf%C4%83g%C4%83r%C4%83%C8%99an_%28Sibiu%29_DN7C.jpg/960px-Panoram%C4%83_Transf%C4%83g%C4%83r%C4%83%C8%99an_%28Sibiu%29_DN7C.jpg'),'טרנספגרשן'],
-   [T('c/c1/Lake_Vidraru%2C_Romania_%28Unsplash%29.jpg/960px-Lake_Vidraru%2C_Romania_%28Unsplash%29.jpg'),'אגם וידרארו'],
-   [T('5/58/Szent_Anna-t%C3%B3_%28panor%C3%A1mak%C3%A9p%29.jpg/960px-Szent_Anna-t%C3%B3_%28panor%C3%A1mak%C3%A9p%29.jpg'),'אגם הלוע סנטה אנה'],
-   [T('5/5a/Bucegi_-_Babele_%289372151700%29.jpg/960px-Bucegi_-_Babele_%289372151700%29.jpg'),'באבלה, רכבל בושטני'],
-   [T('d/da/20140628_Bran_Castle_03.jpg/960px-20140628_Bran_Castle_03.jpg'),'טירת בראן']],
+  imgs:IMG.ro,
   flight:{price:173,air:'הייסקיי הלוך, ויז חזור, ישיר',out:'11:10→13:40',back:'05:45→08:25',land:'08:25',ap:'בוקרשט'},
   total:[3625,4921],car:'≈ 700–1,190 ₪',km:890,
   scores:{mount:5,water:4,bike:3,cable:5,price:4,drive:2,sure:3},
@@ -330,12 +344,7 @@ const D = [
    ['ה\' 22','באבלה → השדה','רכבל לפסגה ולספינקס, אופניים באגם פלטינו','🚡💧🚲']]},
  {id:'oh',c:'var(--oh)',flag:'🇲🇰',name:'אגם אוחריד',sub:'מקדוניה הצפונית והחוף האלבני',doc:'plan-ohrid.html',
   one:'רכיבה לגליצ\'יצה, קיאק, סירת משוטים על המעיינות, שני חופים ורכבל דאיטי.',
-  imgs:[
-   [T('a/a5/Lake-Ohrid-seen-from-Galichica-P1470065.jpg/960px-Lake-Ohrid-seen-from-Galichica-P1470065.jpg'),'האגם מגליצ\'יצה'],
-   [T('4/47/Lake_Ohrid_from_the_Monastery_of_St._Naum.jpg/960px-Lake_Ohrid_from_the_Monastery_of_St._Naum.jpg'),'סווטי נאום'],
-   [T('3/37/Drilon%2C_Pogradec_%289%29.jpg/960px-Drilon%2C_Pogradec_%289%29.jpg'),'מעיינות דרילון'],
-   [T('1/1b/Boat%2C_Kaneo_Beach.jpg/960px-Boat%2C_Kaneo_Beach.jpg'),'סירה בקנאו'],
-   [T('8/89/Dajti-Express-04.JPG/960px-Dajti-Express-04.JPG'),'רכבל דאיטי']],
+  imgs:IMG.oh,
   flight:{price:432,air:'ישראייר, ישיר',out:'07:55→09:50',back:'01:40→05:25 (לילה ה\'–ו\')',land:'05:25',ap:'טירנה'},
   total:[3832,5083],car:'≈ 650–1,170 ₪',km:450,
   scores:{mount:3,water:5,bike:5,cable:2,price:2,drive:4,sure:3},
@@ -475,6 +484,18 @@ const rows=[
 document.getElementById('cmp').innerHTML=`<tr><th></th>${D.map(d=>`<th style="color:${d.c}">${d.flag} ${d.name}</th>`).join('')}</tr>`+
  rows.map(([l,f,fm,best])=>{const vals=D.map(f);const bv=best==='min'?Math.min(...vals):best==='max'?Math.max(...vals):null;
   return `<tr><td class="k">${l}</td>${D.map((d,i)=>`<td>${best&&vals[i]===bv?'<span class="w">✔ </span>':''}${fm(vals[i],d)}</td>`).join('')}</tr>`}).join('');
+
+/* gallery */
+let gCur='pl',gI=0;const glb=document.getElementById('glb');
+function gRender(){document.getElementById('gTabs').innerHTML=D.map(d=>`<button class="btn ${d.id===gCur?'on':''}" data-g="${d.id}">${d.flag} ${d.name}</button>`).join('');
+  document.getElementById('gGrid').innerHTML=GALI[gCur].map((e,i)=>`<button data-i="${i}"><img src="${e.t}" alt="${e.c}" loading="lazy"><span>${e.c}</span></button>`).join('')}
+function gShow(i){const L=GALI[gCur];gI=(i+L.length)%L.length;glb.querySelector('img').src=L[gI].u;glb.querySelector('.gc').textContent=`${L[gI].c} · ${gI+1}/${L.length}`;glb.classList.add('on');[1,-1].forEach(k=>{new Image().src=L[(gI+k+L.length)%L.length].u})}
+document.getElementById('gTabs').onclick=e=>{const b=e.target.closest('[data-g]');if(b){gCur=b.dataset.g;gRender()}};
+document.getElementById('gGrid').onclick=e=>{const b=e.target.closest('[data-i]');if(b)gShow(+b.dataset.i)};
+glb.onclick=e=>{if(e.target.closest('.x')||e.target===glb)glb.classList.remove('on');else if(e.target.closest('.p'))gShow(gI-1);else if(e.target.closest('.n'))gShow(gI+1)};
+document.addEventListener('keydown',e=>{if(!glb.classList.contains('on'))return;if(e.key==='Escape')glb.classList.remove('on');if(e.key==='ArrowLeft')gShow(gI+1);if(e.key==='ArrowRight')gShow(gI-1)});
+{let x0=null;glb.addEventListener('touchstart',e=>x0=e.touches[0].clientX,{passive:true});glb.addEventListener('touchend',e=>{if(x0==null)return;const dx=e.changedTouches[0].clientX-x0;if(Math.abs(dx)>40)gShow(gI+(dx<0?-1:1));x0=null})}
+gRender();
 </script>
 </body>
 </html>
