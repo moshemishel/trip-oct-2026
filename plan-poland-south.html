@@ -1,0 +1,959 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>דרום פולין – תכנון ימים</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+:root{
+  --bg:#0f1418; --bg2:#161d23; --card:#1b242c; --line:#2a3640; --ink:#e8eef2; --ink2:#a9b6c0; --mute:#7d8b96;
+  --acc:#4fb3a9; --acc2:#e8a849; --ok:#4caf7a; --warn:#e8a849; --bad:#e0605a;
+  --d1:#e0605a; --d2:#4f8fe0; --d3:#4caf7a; --d4:#b26fe0; --d5:#e8a849;
+  --shadow:0 6px 24px rgba(0,0,0,.35);
+}
+:root[data-theme="light"]{
+  --bg:#f5f3ee; --bg2:#ebe8e1; --card:#ffffff; --line:#ddd8cd; --ink:#1d252b; --ink2:#4a5660; --mute:#7a858d;
+  --acc:#2a8a80; --acc2:#b97a1c; --ok:#2e8b57; --warn:#b97a1c; --bad:#c0443e; --shadow:0 4px 16px rgba(0,0,0,.08);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Heebo,system-ui,sans-serif;font-size:17px;line-height:1.6}
+a{color:var(--acc)}
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px}
+h2{font-size:1.7rem;margin:0 0 .3em;font-weight:800}
+h3{margin:.2em 0 .4em;font-size:1.15rem}
+section{padding:42px 0;border-bottom:1px solid var(--line)}
+.sub{color:var(--ink2);margin:0 0 1.2em}
+.pill{display:inline-block;padding:2px 10px;border-radius:99px;font-size:.8rem;background:var(--bg2);color:var(--ink2);border:1px solid var(--line);margin:2px}
+.ok{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+.ils{color:var(--acc);font-size:.9em;white-space:nowrap}
+
+/* hero */
+.hero{position:relative;min-height:440px;display:flex;align-items:flex-end;color:#fff;
+  background:linear-gradient(to top,rgba(10,14,18,.92) 10%,rgba(10,14,18,.25) 70%),url("https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/Morskie_Oko_08_VIII_2004-0015.jpg/1280px-Morskie_Oko_08_VIII_2004-0015.jpg") center/cover}
+.hero .wrap{padding-bottom:34px;width:100%}
+.hero h1{font-size:2.6rem;margin:0;font-weight:800;line-height:1.15}
+.hero p{margin:.4em 0 0;font-size:1.1rem;color:#dfe7ec}
+.topbar{position:sticky;top:0;z-index:1000;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.topbar .wrap{display:flex;gap:6px;align-items:center;overflow-x:auto;padding-top:8px;padding-bottom:8px;white-space:nowrap}
+.topbar a{text-decoration:none;color:var(--ink2);font-size:.9rem;padding:4px 10px;border-radius:8px}
+.topbar a:hover{background:var(--bg2);color:var(--ink)}
+#fxMini{margin-inline-start:auto;font-size:.82rem;color:var(--ink2);background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:4px 10px;text-decoration:none}
+#themeBtn{background:var(--bg2);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:4px 10px;cursor:pointer;font:inherit;font-size:.9rem}
+
+.bottomline{display:grid;grid-template-columns:1.3fr 1fr;gap:18px;margin-top:-10px}
+.box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;box-shadow:var(--shadow)}
+.box.alert{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 10%,var(--card))}
+.box.good{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 9%,var(--card))}
+.box.note{border-color:var(--warn);background:color-mix(in srgb,var(--warn) 9%,var(--card))}
+.box h3{margin-top:0}
+.box ol,.box ul{margin:.3em 0;padding-inline-start:1.2em}
+
+/* timeline */
+.tl{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+.tl div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}
+.tl b{display:block;font-size:1.05rem}
+.tl small{color:var(--ink2);font-size:.82rem;display:block;line-height:1.35}
+.tl .full{border-color:var(--acc)}
+.tl .half{opacity:.85;border-style:dashed}
+
+table{width:100%;border-collapse:collapse;background:var(--card);font-size:.95rem}
+th,td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:right;vertical-align:top}
+th{background:var(--bg2);font-weight:700;color:var(--ink2);font-size:.85rem}
+.tablewrap{overflow-x:auto;border-radius:12px;border:1px solid var(--line)}
+tr.total td{font-weight:800;background:var(--bg2)}
+
+/* map */
+#map{height:74vh;min-height:500px;border-radius:14px;border:1px solid var(--line);box-shadow:var(--shadow);background:#dfe6e9}
+.mapbar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;align-items:center}
+.mapbar .sep{flex:1}
+.vbtn{background:var(--card);border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:7px 14px;cursor:pointer;font:inherit;font-size:.95rem}
+.vbtn.on{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:700}
+.vbtn.ghost{font-size:.88rem;padding:6px 12px}
+.legend{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.legend button{display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:6px 10px;cursor:pointer;font:inherit;font-size:.88rem}
+.legend button.dim{opacity:.4}
+.legend i{width:14px;height:14px;border-radius:50%;display:inline-block}
+.pin{font-size:17px;line-height:26px;width:30px;height:30px;text-align:center;border-radius:50%;background:#fff;border:2px solid #333;box-shadow:0 2px 6px rgba(0,0,0,.4);transition:all .15s}
+.pin.closed{filter:grayscale(1);opacity:.55;border-style:dashed}
+.far .pin{width:22px;height:22px;line-height:18px;font-size:11px;border-width:1.5px}
+.daytag{background:#fff;color:#222;border-radius:99px;font:800 13px Heebo,sans-serif;padding:1px 8px;border:2px solid #333;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.35);display:inline-block;transform:translate(-50%,-50%)}
+.base{background:#1d252b;color:#fff;border-color:#1d252b;font-weight:700}
+.far .base{font-size:11px;padding:0 6px}
+.leaflet-popup-content{font-family:Heebo,sans-serif;direction:rtl;text-align:right;font-size:14px;margin:10px 14px;color:#222}
+.leaflet-popup-content b{font-size:15px}
+.leaflet-popup-content img{width:100%;border-radius:8px;margin-bottom:6px;height:120px;object-fit:cover;cursor:zoom-in}
+
+/* variants */
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.vhead{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px}
+.facts{display:flex;flex-wrap:wrap;gap:6px}
+.day{display:grid;grid-template-columns:130px 1fr;gap:16px;background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:12px;overflow:hidden}
+.day .dl{padding:14px;color:#fff;display:flex;flex-direction:column;justify-content:center}
+.day .dl b{font-size:1.5rem;line-height:1}
+.day .dl span{font-size:.85rem;opacity:.95}
+.day .db{padding:14px 16px 14px 0}
+.day .db p{margin:.25em 0}
+.day .meta{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.day .tip{font-size:.9rem;color:var(--ink2);border-inline-start:3px solid var(--acc2);padding-inline-start:10px;margin-top:8px}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:99px;background:color-mix(in srgb,var(--acc) 16%,transparent);color:var(--ink);font-size:.85rem;cursor:pointer;border:1px solid color-mix(in srgb,var(--acc) 40%,transparent)}
+.proscons{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px}
+.proscons ul{margin:0;padding-inline-start:1.1em;font-size:.93rem}
+
+/* cards + gallery */
+.filters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.filters button{background:var(--card);border:1px solid var(--line);color:var(--ink);border-radius:99px;padding:5px 14px;cursor:pointer;font:inherit;font-size:.9rem}
+.filters button.on{background:var(--ink);color:var(--bg)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow);scroll-margin-top:70px}
+.card.flash{outline:3px solid var(--acc2)}
+.gal{height:210px;background:var(--bg2);position:relative;overflow:hidden;cursor:zoom-in}
+.gal img{width:100%;height:100%;object-fit:cover;display:block}
+.gal .st{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.72);color:#fff;font-size:.8rem;padding:3px 10px;border-radius:99px}
+.gal .cnt{position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.65);color:#fff;font-size:.78rem;padding:2px 9px;border-radius:99px}
+.gal .zoom{position:absolute;bottom:10px;left:10px;background:rgba(0,0,0,.65);color:#fff;font-size:.78rem;padding:2px 9px;border-radius:99px}
+.gal button.nav{position:absolute;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;border:0;background:rgba(0,0,0,.55);color:#fff;font-size:22px;line-height:34px;cursor:pointer;opacity:.85}
+.gal button.nav:hover{opacity:1;background:rgba(0,0,0,.8)}
+.gal .prev{right:8px} .gal .next{left:8px}
+.card.closed .gal img{filter:grayscale(1)}
+.card .cb{padding:14px 16px;flex:1;display:flex;flex-direction:column}
+.card h3{margin:0}
+.card .latin{color:var(--mute);font-size:.85rem;margin-bottom:6px;direction:ltr;text-align:right}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-size:.9rem;margin:8px 0}
+.kv dt{color:var(--mute)} .kv dd{margin:0}
+.season{font-size:.88rem;padding:8px 10px;border-radius:8px;background:var(--bg2);margin-top:auto}
+.card .alt{font-size:.88rem;color:var(--ink2);margin:6px 0 10px}
+
+/* lightbox */
+#lb{position:fixed;inset:0;background:rgba(5,8,10,.94);z-index:5000;display:none;flex-direction:column;align-items:center;justify-content:center;padding:16px}
+#lb.open{display:flex}
+#lb #lbImg{max-width:min(1200px,94vw);max-height:76vh;border-radius:10px;object-fit:contain;box-shadow:0 10px 40px rgba(0,0,0,.6)}
+#lb .cap{color:#fff;margin-top:12px;font-size:1.05rem;text-align:center}
+#lb .cap small{color:#9aa;display:block;font-size:.8rem}
+#lb .thumbs{display:flex;gap:6px;margin-top:12px;overflow-x:auto;max-width:94vw;padding-bottom:4px}
+#lb .thumbs img{width:76px;height:52px;object-fit:cover;border-radius:6px;opacity:.5;cursor:pointer;flex:none}
+#lb .thumbs img.on{opacity:1;outline:2px solid #fff}
+#lb button{position:absolute;background:rgba(255,255,255,.12);color:#fff;border:0;border-radius:50%;width:52px;height:52px;font-size:28px;cursor:pointer}
+#lb button:hover{background:rgba(255,255,255,.25)}
+#lb .x{top:16px;left:16px;width:44px;height:44px;font-size:22px}
+#lb .lp{right:16px;top:45%} #lb .ln{left:16px;top:45%}
+
+
+/* weather */
+.wxgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.wxd{background:var(--card);border:1px solid var(--line);border-top:4px solid var(--line);border-radius:12px;padding:12px;text-align:center}
+.wxd .wdate{font-weight:800;font-size:1.05rem}
+.wxd .wplan{font-size:.8rem;color:var(--ink2);min-height:2.4em;line-height:1.2}
+.wxd .wloc{font-size:.78rem;color:var(--mute)}
+.wxd .wico{font-size:38px;line-height:1.3}
+.wxd .wtxt{font-size:.85rem;color:var(--ink2)}
+.wxd .wtemp{font-size:1.1rem;margin-top:4px}
+.wxd .wsm{font-size:.78rem;color:var(--ink2);margin-top:4px}
+.wxd .wclim{font-size:.75rem;color:var(--mute);margin-top:6px;border-top:1px dashed var(--line);padding-top:4px}
+@media (max-width:820px){.wxgrid{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:480px){.wxgrid{grid-template-columns:repeat(2,1fr)}}
+
+/* fx */
+.fx{display:grid;grid-template-columns:1.2fr 1fr;gap:16px}
+.fxconv{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:1.1rem}
+.fxconv input,.fxconv select,.fxrates input{background:var(--bg2);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:inherit}
+.fxconv input{width:120px}
+.fxres{font-size:1.6rem;font-weight:800;color:var(--acc);margin-top:8px}
+.fxrates{display:grid;grid-template-columns:auto 1fr;gap:8px 12px;align-items:center}
+.fxrates input{width:110px}
+.fxquick{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.fxquick span{background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:3px 9px;font-size:.88rem}
+
+/* builder */
+.bgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.bday{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
+.bday select{width:100%;margin-top:6px;padding:7px;border-radius:8px;background:var(--bg2);color:var(--ink);border:1px solid var(--line);font:inherit;font-size:.9rem}
+.bday .hrs{font-size:.85rem;color:var(--ink2);margin-top:6px}
+#bwarn{margin-top:14px}
+#bwarn div{padding:8px 12px;border-radius:8px;margin-bottom:6px;font-size:.93rem}
+#bwarn .w{background:color-mix(in srgb,var(--warn) 15%,transparent);border:1px solid var(--warn)}
+#bwarn .e{background:color-mix(in srgb,var(--bad) 15%,transparent);border:1px solid var(--bad)}
+#bwarn .g{background:color-mix(in srgb,var(--ok) 15%,transparent);border:1px solid var(--ok)}
+.btotal{font-size:1.1rem;margin-top:10px}
+
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.two>*,.bottomline>*,.vhead>*,.fx>*{min-width:0}
+.src{font-size:.85rem;color:var(--ink2)} .src li{margin-bottom:3px}
+footer{padding:30px 0;color:var(--mute);font-size:.85rem}
+
+@media (max-width:820px){
+  .bottomline,.vhead,.two,.proscons,.fx{grid-template-columns:1fr}
+  .tl{grid-template-columns:repeat(3,1fr)}
+  .bgrid{grid-template-columns:1fr 1fr}
+  .hero h1{font-size:2rem}
+  .day{grid-template-columns:1fr}
+  .day .db{padding:0 16px 14px}
+  .grid{grid-template-columns:1fr}
+  #lb .lp,#lb .ln{top:auto;bottom:16px}
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="pill" style="background:rgba(0,0,0,.4);color:#fff;border-color:rgba(255,255,255,.3)">18–23 באוקטובר 2026 · נחיתה בקרקוב 13:50 · המראה 05:40 · 🚗 עם רכב</div>
+    <h1>דרום פולין: הרים, אגמים, רכבלים ואופניים</h1>
+    <p>טטרה, פייניני וקפיצה לסלובקיה. 3 מסלולים ברכב, קוביות לבנייה עצמית, מפה, אלבומי תמונות ומחירים בשקלים לפי השער של היום.</p>
+  </div>
+</header>
+
+<nav class="topbar"><div class="wrap">
+  <a href="#bottom">השורה התחתונה</a><a href="#season">מה פתוח</a><a href="#weather">מזג אוויר</a><a href="#mapsec">מפה</a><a href="#variants">מסלולים</a><a href="#compare">השוואה</a><a href="#blocks">אטרקציות</a><a href="#builder">בנה בעצמך</a><a href="#budget">תקציב</a><a href="#car">רכב</a><a href="#fx">המרה</a><a href="#rain">גשם</a>
+  <a id="fxMini" href="#fx">💱 …</a>
+  <button id="themeBtn">☀️ / 🌙</button>
+</div></nav>
+
+<main class="wrap">
+
+<!-- ========== BOTTOM LINE ========== -->
+<section id="bottom">
+  <div class="bottomline">
+    <div class="box good">
+      <h3>⭐ ההמלצה: מסלול A, "הקלאסי האוסטרי"</h3>
+      <ol>
+        <li><b>א' 18.10:</b> נחיתה, ונסיעה לזקופנה</li>
+        <li><b>ב' 19.10:</b> יום בסלובקיה: רכבל לפסגת לומניצקי שטיט (2,634 מ') ואגם שטרבסקה פלסו</li>
+        <li><b>ג' 20.10:</b> מורסקיה אוקו, ובערב בריכות תרמיות</li>
+        <li><b>ד' 21.10:</b> פייניני: רפסודות בקניון ואופניים לאורך הנהר</li>
+        <li><b>ה' 22.10:</b> טירה על האגם, ואז קרקוב בערב (לינה ליד השדה)</li>
+      </ol>
+      <p style="margin:.5em 0 0">תקציב לאדם שנוסע לבד, כולל טיסה, רכב ודלק: <b id="blA">…</b></p>
+    </div>
+    <div class="box alert">
+      <h3>❌ הרכבל ל-Kasprowy Wierch סגור בתאריכים שלך</h3>
+      <p style="margin:.2em 0">לפי האתר הרשמי של PKL, הרכבל <b>סגור להפסקה טכנית מ-19.10 עד 6.11.2026</b>. זה בדיוק הימים שלך.</p>
+      <p style="margin:.4em 0 0"><b>מה במקום:</b> רכבל <b>Lomnický štít</b> בסלובקיה, כשעה מזקופנה. הוא גבוה יותר (2,634 מ' לעומת 1,987 מ'), ומרגיש יותר כמו אוסטריה.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== TIME FRAME + SEASON ========== -->
+<section id="season">
+  <h2>מסגרת הזמן ומה פתוח בעונה</h2>
+  <p class="sub">יש לך 4 ימים מלאים וחצי יום. הטיסה חזרה ב-05:40, אז את הלילה האחרון ישנים ליד שדה התעופה של קרקוב.</p>
+  <div class="tl">
+    <div class="half"><b>א' 18</b><small>נחיתה 13:50<br>איסוף רכב ונסיעה</small></div>
+    <div class="full"><b>ב' 19</b><small>יום מלא<br>⚠️ ימי שני: טירת ניידיצה סגורה</small></div>
+    <div class="full"><b>ג' 20</b><small>יום מלא</small></div>
+    <div class="full"><b>ד' 21</b><small>יום מלא</small></div>
+    <div class="full"><b>ה' 22</b><small>יום מלא<br>בערב נוסעים לקרקוב</small></div>
+    <div class="half"><b>ו' 23</b><small>יציאה לשדה ב-03:00<br>המראה 05:40</small></div>
+  </div>
+
+  <div class="two" style="margin-top:18px">
+    <div class="box">
+      <h3>🍂 איך נראה סוף אוקטובר</h3>
+      <ul>
+        <li>ביום בערך <b>12°C</b> בזקופנה (ביום קר 6°C), ובלילה בערך 4°C. כפור רק ב-1 מכל 12 לילות. בפסגות מתחת לאפס.</li>
+        <li><b>שלג ראשון</b> מעל 1,500 מ' הוא סביר. כדאי להעדיף מסלולים בעמקים ולצאת עם נעליים טובות.</li>
+        <li>השמש זורחת בערך ב-07:00 ושוקעת בערך ב-17:20. אז יוצאים מוקדם.</li>
+        <li>הסתיו הזהוב: היערות צבועים בצהוב וכתום. זו עונה מצוינת לצילום.</li>
+        <li>אין הרבה תיירים, אבל חלק מהשירותים כבר עברו לשעות של סוף עונה.</li>
+      </ul>
+    </div>
+    <div class="box">
+      <h3>✅ / ⚠️ / ❌ סטטוס ל-18–23.10</h3>
+      <div class="tablewrap"><table id="seasonTable"></table></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== WEATHER ========== -->
+<section id="weather">
+  <h2>🌦️ מזג האוויר ל-18–23.10</h2>
+  <p class="sub">התחזית מתעדכנת בכל פעם שפותחים את הדף. ככל שמתקרבים לטיסה, היא נעשית מדויקת יותר.</p>
+  <div class="box note" id="wxStatus" style="margin-bottom:14px">טוען תחזית…</div>
+  <div class="tabs" id="wxTabs"></div>
+  <div class="wxgrid" id="wxDays"></div>
+  <div class="legend" style="margin-top:8px">
+    <span class="pill"><b class="ok">●</b> תחזית מדויקת (עד 7 ימים קדימה)</span>
+    <span class="pill"><b class="warn">●</b> תחזית בינונית (8–16 ימים)</span>
+    <span class="pill"><b style="color:var(--mute)">●</b> טווח ארוך (חציון של 31 תרחישים, כולל טווח)</span>
+  </div>
+
+  <div class="two" style="margin-top:18px">
+    <div class="box">
+      <h3>📊 מה קרה ב-15 השנים האחרונות ב-18–23 באוקטובר</h3>
+      <div class="tablewrap"><table id="climTable"></table></div>
+      <p class="src" style="margin-top:8px">מקור: Open-Meteo, נתוני ERA5 לשנים 2011–2025. "יום גשום" = לפחות 1 מ"מ גשם. "יום שמשי" = לפחות 6 שעות שמש.</p>
+    </div>
+    <div class="box">
+      <h3>🧭 איך להשתמש בתחזית</h3>
+      <ul>
+        <li><b>עד 10.10</b> התחזית לתאריכים האלה נותנת רק כיוון כללי. עד אז סומכים על הממוצע הרב-שנתי.</li>
+        <li><b>מ-11.10</b> הימים הראשונים של הטיול נכנסים לתחזית של 7 ימים. אז כדאי להתחיל לתכנן לפיה.</li>
+        <li><b>ביום שלפני ובבוקר עצמו:</b> מחליטים איזה יום הולכים ל-Lomnický. בפסגה יש <b>98% סיכוי לכפור</b>, והטמפרטורה המקסימלית הממוצעת שם היא 0.5°C. גם ביום שמשי צריך מעיל.</li>
+        <li>בממוצע, ב-6 מכל 10 ימים יש לפחות 6 שעות שמש. בערך ב-3 מכל 10 ימים יורד גשם.</li>
+      </ul>
+      <p style="margin:.6em 0 0" id="wxLinks"></p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== MAP ========== -->
+<section id="mapsec">
+  <h2>🗺️ המפה</h2>
+  <p class="sub">הנעצים הם האטרקציות (לחיצה פותחת פרטים ותמונה). הקווים הם המסלול של כל יום, לפי הכבישים. בוחרים מסלול בכפתורים. לחיצה על יום במקרא מסתירה אותו או מציגה אותו.</p>
+  <div class="mapbar"><span id="mapVariants" style="display:contents"></span><span class="sep"></span>
+    <button class="vbtn ghost" id="zArea">🏔️ אזור הטיול</button><button class="vbtn ghost" id="zAll">🔭 כולל קרקוב</button></div>
+  <div id="map" dir="ltr"></div>
+  <div class="legend" id="legend"></div>
+</section>
+
+<!-- ========== VARIANTS ========== -->
+<section id="variants">
+  <h2>3 מסלולים ברכב</h2>
+  <p class="sub">כל מסלול בנוי מהאטרקציות שבהמשך. לחיצה על שם של אטרקציה מקפיצה לכרטיס שלה. אפשר להחליף בין ימים לפי התחזית.</p>
+  <div class="tabs" id="vtabs"></div>
+  <div id="vbody"></div>
+</section>
+
+<!-- ========== COMPARE ========== -->
+<section id="compare">
+  <h2>השוואה מהירה</h2>
+  <div class="tablewrap"><table>
+    <tr><th>מסלול</th><th>כמה בסיסי לינה</th><th>רכבלים</th><th>אופניים</th><th>אגמים</th><th>נהיגה</th><th>תקציב סולו*</th><th>מתאים ל...</th></tr>
+    <tr><td><b>A · הקלאסי האוסטרי ⭐</b></td><td>3 (זקופנה, שצ'בניצה, קרקוב)</td><td>1–2</td><td>✓</td><td>4</td><td>~570 ק"מ</td><td data-budget="v1">…</td><td>מי שרוצה מכל דבר קצת: פסגה, אגם, נהר ואופניים</td></tr>
+    <tr><td><b>B · אופניים ואגמים</b></td><td>3</td><td>1</td><td>✓✓ (2 ימים)</td><td>5</td><td>~520 ק"מ</td><td data-budget="v3">…</td><td>מי שאוהב לרכוב. בסיס שקט ליד אגם</td></tr>
+    <tr><td><b>C · רכבלים ופסגות</b></td><td>2</td><td>3–4</td><td>–</td><td>3</td><td>~640 ק"מ</td><td data-budget="v4">…</td><td>מי שרוצה כמה שיותר נופים מלמעלה ופחות הליכה</td></tr>
+  </table></div>
+  <p class="src">* לאדם אחד שנוסע לבד, כולל טיסה, רכב, דלק, לינה, אטרקציות ואוכל. הטווח תלוי בעיקר ברמת הלינה. הרכב מחושב לפי Kaizenrent או Express, כולל אישור לסלובקיה (ראה <a href="#car">רכב</a>). אם נוסעים שניים, הרכב, הדלק והחדר מתחלקים.</p>
+</section>
+
+<!-- ========== BLOCKS ========== -->
+<section id="blocks">
+  <h2>האטרקציות</h2>
+  <p class="sub">כל כרטיס כולל זמן, מחיר (עם המרה לשקלים), מצב בעונה, עם מה הוא משתלב טוב, ומה החלופה. החיצים מדפדפים בין התמונות, ולחיצה על התמונה פותחת את האלבום במסך מלא.</p>
+  <div class="filters" id="filters"></div>
+  <div class="grid" id="cards"></div>
+</section>
+
+<!-- ========== BUILDER ========== -->
+<section id="builder">
+  <h2>🧩 בנה בעצמך</h2>
+  <p class="sub">בוחרים עד שתי אטרקציות לכל יום מלא. המערכת מסכמת עלות ושעות, ומזהירה מימים סגורים, מימים עמוסים מדי ומנסיעה ארוכה לפני הטיסה.</p>
+  <div class="bgrid" id="bgrid"></div>
+  <div class="btotal" id="btotal"></div>
+  <div id="bwarn"></div>
+  <p style="margin-top:12px"><button class="vbtn" id="bloadA">טען את מסלול A</button> <button class="vbtn" id="bclear">נקה</button></p>
+</section>
+
+<!-- ========== BUDGET ========== -->
+<section id="budget">
+  <h2>💰 תקציב (אדם אחד לבד)</h2>
+  <p class="sub">הסכומים בשקלים מחושבים לפי <a href="#fx">שער ההמרה</a>. בוחרים מסלול:</p>
+  <div class="tabs" id="budTabs"></div>
+  <div class="tablewrap"><table id="budTable"></table></div>
+  <p class="src">איך חוסכים: ב-Lomnický אפשר לעלות רק עד Skalnaté pleso, וזה חוסך בערך €50. אפשר לוותר על עגלת הסוסים במורסקיה אוקו. כדאי לתדלק בפולין, כי הדלק שם זול יותר. ואם לוקחים מזוודה, להוסיף אותה ישירות באתר Wizz.</p>
+</section>
+
+<!-- ========== CAR ========== -->
+<section id="car">
+  <h2>🚗 הרכב</h2>
+  <p class="sub">SUV קטן אוטומטי בשדה בקרקוב: איסוף ב-18.10 בשעה 14:00, החזרה ב-23.10 בשעה 03:30. מחירים מ-Skyscanner ו-Holiday Autos.</p>
+
+  <div class="box alert" style="margin-bottom:16px">
+    <h3>❌ CarFree (הזולה ביותר) לא מרשה לצאת מפולין</h3>
+    <p style="margin:.2em 0">בתנאים שלה כתוב: <i>"All international, state and island crossings are disallowed"</i>. כלומר, איתה <b>אי אפשר לנסוע לסלובקיה</b>, ולכן אין רכבל Lomnický ואין שטרבסקה פלסו. מי שנוסע בלי אישור מאבד את הביטוח. ומכיוון שהרכבל ל-Kasprowy סגור, הרכבל בסלובקיה הוא הרכבל הגדול היחיד שנשאר.</p>
+    <p style="margin:.4em 0 0"><b>ולמה הכל כל כך זול?</b> אלה לא טעויות במחיר. בסוף אוקטובר בקרקוב יש הרבה רכבים פנויים, וחברות קטנות מרוויחות בדלפק: ביטוח, פיקדון ותוספות.</p>
+  </div>
+
+  <div class="tablewrap"><table>
+    <tr><th>חברה</th><th>רכב</th><th>מחיר ל-5 ימים</th><th>סלובקיה</th><th>החזרה ב-03:30</th><th>השתתפות עצמית / פיקדון</th><th>איסוף</th><th>סה"כ עם סלובקיה</th></tr>
+    <tr><td><b>Kaizenrent ⭐</b></td><td>Nissan Qashqai אוטו'</td><td>£68.11<span class="ils" data-c="GBP" data-a="68.11"></span></td><td class="ok">✅ €66.50<span class="ils" data-c="EUR" data-a="66.5"></span></td><td class="ok">✅ כלול במחיר</td><td>£852 / €1,000</td><td>בתוך הטרמינל · מלא-מלא</td><td><b data-sum="kaizen"></b></td></tr>
+    <tr><td><b>Express</b></td><td>Seat Arona אוטו'</td><td>£54.06<span class="ils" data-c="GBP" data-a="54.06"></span></td><td class="warn">✅ 199 זל<span class="ils" data-c="PLN" data-a="199"></span>, לפי בקשה</td><td class="warn">⚠️ לא כתוב</td><td>£973 / 5,000 זל</td><td>שאטל מהטרמינל · כמו שקיבלת</td><td><b data-sum="express"></b></td></tr>
+    <tr><td>CarFree</td><td>Mokka / Juke אוטו'</td><td>$19.71–£37.59</td><td class="bad">❌ אסור</td><td class="ok">✅ כלול במחיר</td><td>£1,946 / 3,000 זל</td><td>בתוך הטרמינל</td><td class="bad">אי אפשר</td></tr>
+    <tr><td>Car Net · Alamo · Enterprise · Sixt</td><td>SUV אוטו'</td><td>£150–218<span class="ils" data-c="GBP" data-a="150" data-b="218"></span></td><td colspan="2">—</td><td></td><td></td><td>יקר פי 2–3</td></tr>
+  </table></div>
+
+  <div class="two" style="margin-top:16px">
+    <div class="box good">
+      <h3>⭐ ההמלצה: Kaizenrent</h3>
+      <ul>
+        <li>הסוכנות הכי זולה שמרשה לנסוע לסלובקיה ומפרטת בדיוק כמה זה עולה.</li>
+        <li><b>החזרה מחוץ לשעות הפעילות כלולה במחיר</b>, וזה חשוב כי מחזירים את הרכב ב-03:30.</li>
+        <li>הדלפק בתוך הטרמינל, אז אין צורך לחכות לשאטל בלילה.</li>
+        <li>להזמין דרך Skyscanner, ולסמן <b>Cross border: Slovakia</b> כבר בהזמנה.</li>
+      </ul>
+      <p style="margin:.4em 0 0;font-size:.93rem"><b>חלופה זולה יותר:</b> Express חוסך בערך 130 ₪. אבל האיסוף שם בשאטל, האישור לסלובקיה ניתן רק לפי בקשה, ולא כתוב מה קורה כשמחזירים ב-03:30.</p>
+      <p style="margin:.4em 0 0;font-size:.93rem"><b>אם מוותרים על סלובקיה:</b> CarFree ב-$19.71 (≈<span data-ilsfrom="USD" data-amt="19.71"></span>) זו עסקה מצוינת. במקום יום סלובקיה עושים יום בפולין: עמק קושצ'ליסקה וגובאלובקה, או עמק חמשת האגמים.</p>
+    </div>
+    <div class="box note">
+      <h3>⚠️ חשוב לכל חברה</h3>
+      <ol>
+        <li><b>כרטיס אשראי פיזי</b> על שם הנהג, עם מסגרת פנויה לפיקדון. כרטיס דביט או כרטיס בארנק דיגיטלי לא מתקבלים.</li>
+        <li><b>רישיון נהיגה בינלאומי:</b> לפי התנאים צריך אותו בנוסף לרישיון הישראלי. כדאי להוציא אותו לפני הטיסה.</li>
+        <li><b>השתתפות עצמית גבוהה (£850–1,950):</b> כדאי לקנות כיסוי מלא אונליין (בערך $37). אם יש נזק, משלמים קודם ומקבלים החזר אחר כך. בדלפק ינסו למכור ביטוח משלהם במחיר גבוה יותר.</li>
+        <li><b>שעת החזרה 03:30</b> צריכה להיות כתובה בהזמנה. אחרת יש סיכון לחיוב נוסף.</li>
+        <li><b>לצלם את הרכב</b> מכל הצדדים כשמקבלים אותו וכשמחזירים אותו.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="two" style="margin-top:16px">
+    <div class="box">
+      <h3>⛽ דלק</h3>
+      <ul>
+        <li><b>בפולין: 6.73 זל לליטר</b> בנזין 95. זה מחיר מקסימום של הממשלה, והוא בתוקף עד סוף 2026.</li>
+        <li><b>בסלובקיה: בערך €1.85 לליטר.</b> יקר יותר, אז מתדלקים בפולין.</li>
+        <li>SUV קטן צורך בהרים בערך 6.5–7.5 ליטר ל-100 ק"מ. <b>במסלול A</b>, בערך 570 ק"מ ≈ <span data-fuel="570"></span>.</li>
+        <li>ב-Kaizenrent מקבלים את הרכב מלא ומחזירים אותו מלא, אז כדאי למצוא תחנה פתוחה 24 שעות ליד השדה.</li>
+      </ul>
+    </div>
+    <div class="box">
+      <h3>🇸🇰 בסלובקיה</h3>
+      <p style="margin:.2em 0">אין בדיקת גבולות. הדרך מזקופנה דרך Łysa Polana לא עוברת בכביש מהיר, אז <b>לא צריך מדבקת אגרה</b>. החניה ליד הרכבלים עולה €5–10. חובה שיהיה אישור לנסוע לסלובקיה בחוזה ההשכרה.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== FX ========== -->
+<section id="fx">
+  <h2>💱 שער המרה</h2>
+  <div class="fx">
+    <div class="box">
+      <h3>מחשבון</h3>
+      <div class="fxconv">
+        <input id="fxAmt" type="number" value="100" min="0" step="any">
+        <select id="fxCur"><option value="PLN">זלוטי (zł)</option><option value="EUR">אירו (€)</option><option value="USD">דולר ($)</option><option value="ILS">שקל (₪)</option></select>
+        <span>=</span>
+      </div>
+      <div class="fxres" id="fxOut">…</div>
+      <div class="fxquick" id="fxQuick"></div>
+    </div>
+    <div class="box">
+      <h3>השערים <small id="fxSrc" style="font-weight:400;color:var(--ink2)"></small></h3>
+      <div class="fxrates">
+        <label>1 זלוטי =</label><span><input id="rPLN" type="number" step="0.001"> ₪</span>
+        <label>€1 =</label><span><input id="rEUR" type="number" step="0.001"> ₪</span>
+        <label>$1 =</label><span><input id="rUSD" type="number" step="0.001"> ₪</span>
+        <label>£1 =</label><span><input id="rGBP" type="number" step="0.001"> ₪</span>
+      </div>
+      <p class="src" style="margin-top:10px">כשהדף נפתח הוא מושך שער עדכני מהבנק המרכזי האירופי (frankfurter.dev). אם אין חיבור, הוא משתמש בשער של 2.10.2026. אפשר לשנות את השער ידנית, וכל המחירים בדף יתעדכנו. בפולין כדאי לשלם בכרטיס, ואם המכשיר שואל, <b>לבחור לחייב בזלוטי</b> ולא בשקלים.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== RAIN ========== -->
+<section id="rain">
+  <h2>🌧️ תוכנית למקרה של גשם או ערפל</h2>
+  <div class="two">
+    <div class="box">
+      <h3>לפי התחזית: מה להזיז (ראה <a href="#weather">מזג אוויר</a>)</h3>
+      <ul>
+        <li><b>היום הכי בהיר → Lomnický štít.</b> בערפל לא רואים מהפסגה כלום. אז קונים כרטיס רק בבוקר של אותו יום.</li>
+        <li><b>יום מעונן אבל יבש → מורסקיה אוקו או עמק קושצ'ליסקה.</b> אגמים ועמקים יפים גם בעננים.</li>
+        <li><b>יום עם טפטוף → רפסודות.</b> נותנים שמיכות, וזה עדיין שווה. בגשם חזק מבטלים.</li>
+      </ul>
+    </div>
+    <div class="box">
+      <h3>יום גשום לגמרי</h3>
+      <ul>
+        <li>🛁 <b>בריכות תרמיות</b>: Chochołowskie או Terma Bania</li>
+        <li>🧂 <b>מכרה המלח וייליצ'קה</b>: מתחת לאדמה, אז מזג האוויר לא משנה. בדרך לקרקוב ביום 5.</li>
+        <li>🏰 <b>טירת ניידיצה</b>: סיור בפנים</li>
+        <li>🏙️ <b>קרקוב</b>: אפשר להקדים את הנסיעה לעיר ביום</li>
+      </ul>
+    </div>
+  </div>
+  <div class="box" style="margin-top:16px">
+    <h3>✅ לפני הנסיעה</h3>
+    <ol>
+      <li>להזמין רכב <b>מ-Kaizenrent</b>, עם שעת החזרה 03:30 ואישור לסלובקיה (פרטים ב<a href="#car">רכב</a>).</li>
+      <li>להוציא <b>רישיון נהיגה בינלאומי</b>, ולבדוק שיש כרטיס אשראי פיזי עם מסגרת פנויה של בערך €1,000 לפיקדון</li>
+      <li>ביטוח נסיעות <b>שמכסה חילוץ בהרים</b>. בסלובקיה החילוץ בתשלום.</li>
+      <li>לקנות מראש כרטיס חניה ל-Palenica Białczańska (מורסקיה אוקו) באתר TPN. המחיר משתנה לפי תאריך.</li>
+      <li>לבגדים: שכבות, כפפות, כובע, מעיל רוח, נעלי הליכה עם סוליה טובה</li>
+    </ol>
+  </div>
+</section>
+
+<section>
+  <h2>מקורות</h2>
+  <ul class="src">
+    <li><a href="https://www.pkl.pl/kasprowy-wierch/cennik-kasprowy.html">PKL – Kasprowy Wierch: מחירון 2026 והודעה על סגירה 19.10–6.11</a> · <a href="https://www.pkl.pl/gubalowka/kolej-linowo-terenowa-gubalowka-cennik.html?setlang=2">Gubałówka</a> · <a href="https://media.pkl.pl/471019-zaplanuj-aktywna-jesien-zanim-nbsprozpoczna-sie-przestoje-serwisowe-w-osrodkach-grupy-pkl">הפסקות PKL בסתיו 2026</a></li>
+    <li><a href="https://www.vt.sk/en/info/info/cableways-opening-hours">vt.sk – שעות פעילות של הרכבלים בטטרה הסלובקית</a> · <a href="https://turisticky.sk/turistika/lanovka-na-lomnicky-stit/">Lomnický – מחירים</a> · <a href="https://turisticky.sk/vylet/lanovka-na-solisko/">Solisko</a></li>
+    <li><a href="https://podhale.info/morskie-oko-bilety-w-2026/">Morskie Oko 2026</a> · <a href="https://turystycznyonline.pl/parking-morskie-oko/">חניה ב-Palenica Białczańska</a></li>
+    <li><a href="https://pieniny-na-weekend.pl/atrakcje-turystyczne-pienin/cennik-splywu-dunajcem/">רפסודות בדונאייץ 2026</a> · <a href="https://rowery.profibudszczawnica.pl/">אופניים בשצ'בניצה</a> · <a href="https://www.jezioroczorsztynskie.com/miedzy-zamkami.html">מעבורת צ'ורשטין</a> · <a href="https://wirtualneszlaki.pl/szlaki-rowerowe/velo-czorsztyn">Velo Czorsztyn</a></li>
+    <li><a href="https://zamekniedzica.pl/godziny-otwarcia-i-ceny-biletow.html">טירת ניידיצה</a> · <a href="https://www.pieninypn.pl/">פארק פייניני</a> · <a href="https://www.kopalnia.pl/turysta-indywidualny/informacje-praktyczne/ceny-biletow-i-godziny-zwiedzania">וייליצ'קה</a> · <a href="https://bachledka.sk/en/leto/the-treetop-walk">Bachledka</a> · <a href="https://giewontatrakcje.pl/blog/termy-chocholowskie">Termy Chochołowskie</a></li>
+    <li><a href="https://www.petrol24.pl/4391/ceny-paliw-cpn-pb95-diesel-pazdziernik-2026/">מחיר הדלק בפולין, אוקטובר 2026 (CPN)</a> · <a href="https://fuelky.info/cena-benzinu-95">מחיר הדלק בסלובקיה</a></li>
+    <li>שערי המרה: <a href="https://frankfurter.dev">frankfurter.dev</a> (ECB) · תמונות: Wikimedia Commons · מפה: Esri, OpenStreetMap · מסלולי נסיעה: OSRM</li>
+  </ul>
+</section>
+</main>
+<footer class="wrap">מחירים ושעות לאוקטובר 2026. בסלובקיה המחירים דינמיים.</footer>
+
+<div id="lb" role="dialog" aria-modal="true">
+  <button class="x" aria-label="סגור">✕</button>
+  <button class="lp" aria-label="הקודמת">›</button>
+  <img id="lbImg" alt="">
+  <button class="ln" aria-label="הבאה">‹</button>
+  <div class="cap" id="lbCap"></div>
+  <div class="thumbs" id="lbThumbs"></div>
+</div>
+
+<script>
+const ROUTES = {"v1":[{"km":113,"min":100,"g":[[50.0749,19.7898],[50.0684,19.7906],[50.0739,19.8096],[50.0427,19.8074],[49.9975,19.8553],[49.991,19.9156],[49.9688,19.9046],[49.9594,19.8886],[49.937,19.895],[49.9069,19.8695],[49.8794,19.8781],[49.8769,19.9036],[49.858,19.9092],[49.8373,19.9486],[49.8287,19.9511],[49.8131,19.9225],[49.7945,19.9236],[49.7836,19.9501],[49.7413,19.9775],[49.7168,19.9815],[49.7072,19.972],[49.6938,19.9042],[49.674,19.8876],[49.6155,19.925],[49.5862,19.9322],[49.5732,19.9475],[49.5539,19.9399],[49.54,19.9704],[49.5212,19.9728],[49.5069,19.9891],[49.4903,19.9861],[49.4628,20.0203],[49.3344,20.0019],[49.2992,19.9496]]},{"km":189,"min":261,"g":[[49.2992,19.9496],[49.3015,19.9567],[49.3084,19.962],[49.3129,19.9767],[49.332,20.0002],[49.34,20.003],[49.338,20.0025],[49.3317,20.0144],[49.3322,20.0444],[49.3373,20.0606],[49.3333,20.0722],[49.334,20.0782],[49.3295,20.0968],[49.3394,20.1009],[49.3447,20.1139],[49.3502,20.1174],[49.3535,20.1248],[49.3574,20.1251],[49.3589,20.1299],[49.3552,20.134],[49.3468,20.1355],[49.3424,20.1403],[49.3453,20.1429],[49.3473,20.15],[49.3468,20.1595],[49.3497,20.1653],[49.3505,20.1751],[49.3475,20.175],[49.3431,20.2016],[49.3369,20.206],[49.3327,20.2174],[49.3335,20.2237],[49.3291,20.2262],[49.3343,20.2299],[49.3387,20.254],[49.334,20.2705],[49.3433,20.284],[49.3347,20.3013],[49.3261,20.3065],[49.3144,20.3041],[49.294,20.2827],[49.288,20.2845],[49.2888,20.2863],[49.288,20.2845],[49.294,20.2827],[49.3144,20.3041],[49.3266,20.3062],[49.3322,20.3128],[49.3312,20.3149],[49.3356,20.3141],[49.3337,20.3207],[49.336,20.3227],[49.3343,20.3251],[49.3338,20.3434],[49.3288,20.3445],[49.3151,20.3664],[49.3091,20.3661],[49.2977,20.3803],[49.2957,20.3895],[49.2957,20.401],[49.2915,20.4118],[49.2937,20.4101],[49.2918,20.4132],[49.2926,20.4211],[49.2887,20.426],[49.2902,20.4279],[49.2881,20.4318],[49.282,20.4306],[49.2784,20.4254],[49.2751,20.4264],[49.2732,20.4182],[49.2701,20.4197],[49.2668,20.427],[49.262,20.4219],[49.226,20.4255],[49.2216,20.4319],[49.192,20.447],[49.2031,20.4071],[49.2111,20.3685],[49.2134,20.3467],[49.2203,20.3328],[49.2154,20.3292],[49.2064,20.3093],[49.1949,20.3016],[49.1836,20.2897],[49.1778,20.294],[49.1718,20.2939],[49.1659,20.2793],[49.1635,20.2811],[49.1648,20.2798],[49.1621,20.2789],[49.1637,20.2763],[49.1628,20.2723],[49.1553,20.2709],[49.1502,20.2589],[49.1503,20.2524],[49.1459,20.2481],[49.1402,20.2363],[49.1385,20.2298],[49.1409,20.2247],[49.1398,20.2209],[49.1323,20.2058],[49.1317,20.2003],[49.1258,20.1956],[49.1257,20.1873],[49.1225,20.1838],[49.1212,20.1713],[49.1169,20.1646],[49.1193,20.1443],[49.1172,20.1388],[49.1194,20.1322],[49.1172,20.1252],[49.1206,20.1133],[49.1173,20.1135],[49.1163,20.1033],[49.1179,20.0994],[49.1147,20.094],[49.1169,20.0828],[49.1107,20.0763],[49.1124,20.068],[49.118,20.069],[49.1199,20.0668],[49.1189,20.0617],[49.1199,20.0668],[49.1124,20.068],[49.1107,20.0763],[49.1169,20.0828],[49.1147,20.094],[49.1179,20.0994],[49.1163,20.1033],[49.1173,20.1135],[49.1206,20.1133],[49.1172,20.1252],[49.1194,20.1322],[49.1172,20.1388],[49.1193,20.1443],[49.1168,20.1641],[49.1212,20.1713],[49.1225,20.1838],[49.1257,20.1873],[49.1258,20.1956],[49.1317,20.2003],[49.1323,20.2058],[49.1398,20.2209],[49.1409,20.2247],[49.1385,20.2298],[49.1401,20.2362],[49.1459,20.2481],[49.1503,20.2524],[49.1502,20.2589],[49.1553,20.2709],[49.1629,20.2729],[49.1673,20.2844],[49.1706,20.2881],[49.1714,20.2936],[49.1778,20.294],[49.1829,20.2896],[49.1886,20.2933],[49.1949,20.3016],[49.2067,20.3096],[49.2154,20.3292],[49.2203,20.3328],[49.2323,20.3135],[49.2436,20.3093],[49.2488,20.3105],[49.2549,20.3025],[49.2631,20.3005],[49.2658,20.294],[49.2668,20.2861],[49.2708,20.2798],[49.2713,20.273],[49.2696,20.2662],[49.2732,20.2499],[49.273,20.2322],[49.2804,20.209],[49.2777,20.2064],[49.2763,20.2008],[49.278,20.1883],[49.2744,20.1883],[49.2803,20.1758],[49.2882,20.1746],[49.2955,20.1653],[49.3091,20.158],[49.3243,20.1548],[49.3468,20.1355],[49.3551,20.134],[49.3589,20.1303],[49.3574,20.1247],[49.3535,20.1248],[49.3502,20.1174],[49.3447,20.1139],[49.3394,20.1009],[49.3296,20.0965],[49.334,20.0782],[49.3333,20.0722],[49.3373,20.0606],[49.3322,20.0444],[49.3317,20.0145],[49.3393,20.0026],[49.332,20.0002],[49.3129,19.9767],[49.3084,19.962],[49.3016,19.9568],[49.2992,19.9496]]},{"km":50,"min":67,"g":[[49.2992,19.9496],[49.3015,19.9567],[49.306,19.9589],[49.3084,19.962],[49.3096,19.969],[49.3129,19.9767],[49.3294,19.9955],[49.332,20.0002],[49.3346,20.002],[49.34,20.003],[49.338,20.0025],[49.3375,20.0057],[49.335,20.0072],[49.3317,20.0144],[49.3309,20.0311],[49.3319,20.0343],[49.3322,20.0444],[49.3373,20.0606],[49.3333,20.0722],[49.334,20.078],[49.3315,20.0852],[49.3311,20.0916],[49.3296,20.0944],[49.3297,20.0978],[49.3267,20.0988],[49.3232,20.1061],[49.3178,20.1054],[49.3138,20.109],[49.3111,20.1092],[49.3062,20.1125],[49.3041,20.1156],[49.3022,20.1142],[49.3008,20.1184],[49.2951,20.1141],[49.2874,20.1122],[49.2786,20.1145],[49.2768,20.1168],[49.2741,20.1166],[49.2728,20.1192],[49.2743,20.1184],[49.2728,20.121],[49.2674,20.1189],[49.2642,20.1151],[49.2623,20.1104],[49.255,20.1033],[49.2623,20.1104],[49.2638,20.1147],[49.2673,20.1188],[49.2728,20.121],[49.2743,20.1185],[49.2728,20.1192],[49.2741,20.1167],[49.2768,20.1169],[49.2786,20.1145],[49.2864,20.1124],[49.295,20.1141],[49.3008,20.1184],[49.3022,20.1142],[49.3041,20.1156],[49.3062,20.1125],[49.3111,20.1092],[49.3138,20.109],[49.3178,20.1054],[49.3232,20.1061],[49.3267,20.0988],[49.3299,20.0974],[49.3296,20.0944],[49.3311,20.0916],[49.3314,20.0854],[49.334,20.078],[49.3333,20.0722],[49.3373,20.0606],[49.3322,20.0444],[49.3319,20.0343],[49.3309,20.0311],[49.3317,20.0145],[49.335,20.0072],[49.3375,20.0057],[49.3379,20.0026],[49.3393,20.0026],[49.3349,20.0021],[49.332,20.0002],[49.3294,19.9955],[49.3129,19.9767],[49.3099,19.9694],[49.3084,19.962],[49.306,19.9589],[49.3016,19.9568],[49.2992,19.9496]]},{"km":66,"min":85,"g":[[49.2992,19.9496],[49.3015,19.9567],[49.3084,19.962],[49.3127,19.9764],[49.3339,20.0017],[49.3586,20.0069],[49.3655,20.0019],[49.3929,20.0166],[49.4244,20.0194],[49.4319,20.0509],[49.4379,20.066],[49.4365,20.0853],[49.4493,20.0918],[49.4644,20.0957],[49.4597,20.1082],[49.4589,20.1183],[49.4608,20.1333],[49.4688,20.1458],[49.4721,20.1629],[49.4732,20.177],[49.4708,20.1952],[49.4627,20.2067],[49.4466,20.223],[49.4424,20.2338],[49.4394,20.236],[49.4381,20.2471],[49.4291,20.2647],[49.4298,20.2739],[49.427,20.2693],[49.425,20.275],[49.4272,20.2922],[49.4262,20.3049],[49.4237,20.3071],[49.4215,20.3193],[49.4186,20.3192],[49.4168,20.3139],[49.4161,20.3197],[49.4073,20.3247],[49.4062,20.3328],[49.4092,20.3449],[49.4084,20.3504],[49.4115,20.3493],[49.4139,20.3441],[49.4197,20.3425],[49.4231,20.3454],[49.4245,20.3507],[49.4263,20.3454],[49.4284,20.3525],[49.4281,20.3597],[49.4331,20.3562],[49.4374,20.3617],[49.437,20.3787],[49.4399,20.3985],[49.4386,20.4064],[49.4419,20.4314],[49.4353,20.4394],[49.4263,20.4455],[49.4256,20.4626],[49.4275,20.4702],[49.4251,20.4826],[49.4288,20.4874],[49.427,20.4871]]},{"km":148,"min":160,"g":[[49.427,20.4871],[49.4263,20.4455],[49.442,20.4311],[49.4373,20.3614],[49.4197,20.3425],[49.4078,20.3493],[49.4072,20.3249],[49.4168,20.3139],[49.4213,20.3196],[49.4168,20.3139],[49.4071,20.3252],[49.4082,20.3503],[49.4344,20.3464],[49.437,20.3134],[49.4398,20.3324],[49.452,20.3133],[49.4509,20.2877],[49.466,20.2442],[49.4727,20.1825],[49.4588,20.117],[49.4669,20.0841],[49.4601,20.0665],[49.4767,20.0506],[49.4775,20.0167],[49.4692,20.0043],[49.4912,19.9858],[49.507,19.9892],[49.5208,19.9731],[49.5396,19.971],[49.5539,19.9401],[49.5732,19.9477],[49.5862,19.9324],[49.6156,19.9252],[49.6754,19.8881],[49.6938,19.9045],[49.7071,19.9722],[49.7168,19.9817],[49.7413,19.9777],[49.7835,19.9504],[49.7945,19.9237],[49.813,19.9226],[49.8286,19.9512],[49.8373,19.9488],[49.858,19.9095],[49.877,19.9037],[49.8796,19.8783],[49.9082,19.8696],[49.9365,19.895],[49.9593,19.8887],[49.969,19.9049],[50.0363,19.941],[50.0489,19.9327],[50.055,19.9446],[50.062,19.9363]]}],"v2":[{"km":113,"min":100,"g":[[50.0749,19.7898],[50.0684,19.7906],[50.0739,19.8096],[50.0427,19.8074],[49.9975,19.8553],[49.991,19.9156],[49.9688,19.9046],[49.9594,19.8886],[49.937,19.895],[49.9069,19.8695],[49.8794,19.8781],[49.8769,19.9036],[49.858,19.9092],[49.8373,19.9486],[49.8287,19.9511],[49.8131,19.9225],[49.7945,19.9236],[49.7836,19.9501],[49.7413,19.9775],[49.7168,19.9815],[49.7072,19.972],[49.6938,19.9042],[49.674,19.8876],[49.6155,19.925],[49.5862,19.9322],[49.5732,19.9475],[49.5539,19.9399],[49.54,19.9704],[49.5212,19.9728],[49.5069,19.9891],[49.4903,19.9861],[49.4628,20.0203],[49.3344,20.0019],[49.2992,19.9496]]},{"km":50,"min":67,"g":[[49.2992,19.9496],[49.3015,19.9567],[49.306,19.9589],[49.3084,19.962],[49.3096,19.969],[49.3129,19.9767],[49.3294,19.9955],[49.332,20.0002],[49.3346,20.002],[49.34,20.003],[49.338,20.0025],[49.3375,20.0057],[49.335,20.0072],[49.3317,20.0144],[49.3309,20.0311],[49.3319,20.0343],[49.3322,20.0444],[49.3373,20.0606],[49.3333,20.0722],[49.334,20.078],[49.3315,20.0852],[49.3311,20.0916],[49.3296,20.0944],[49.3297,20.0978],[49.3267,20.0988],[49.3232,20.1061],[49.3178,20.1054],[49.3138,20.109],[49.3111,20.1092],[49.3062,20.1125],[49.3041,20.1156],[49.3022,20.1142],[49.3008,20.1184],[49.2951,20.1141],[49.2874,20.1122],[49.2786,20.1145],[49.2768,20.1168],[49.2741,20.1166],[49.2728,20.1192],[49.2743,20.1184],[49.2728,20.121],[49.2674,20.1189],[49.2642,20.1151],[49.2623,20.1104],[49.255,20.1033],[49.2623,20.1104],[49.2638,20.1147],[49.2673,20.1188],[49.2728,20.121],[49.2743,20.1185],[49.2728,20.1192],[49.2741,20.1167],[49.2768,20.1169],[49.2786,20.1145],[49.2864,20.1124],[49.295,20.1141],[49.3008,20.1184],[49.3022,20.1142],[49.3041,20.1156],[49.3062,20.1125],[49.3111,20.1092],[49.3138,20.109],[49.3178,20.1054],[49.3232,20.1061],[49.3267,20.0988],[49.3299,20.0974],[49.3296,20.0944],[49.3311,20.0916],[49.3314,20.0854],[49.334,20.078],[49.3333,20.0722],[49.3373,20.0606],[49.3322,20.0444],[49.3319,20.0343],[49.3309,20.0311],[49.3317,20.0145],[49.335,20.0072],[49.3375,20.0057],[49.3379,20.0026],[49.3393,20.0026],[49.3349,20.0021],[49.332,20.0002],[49.3294,19.9955],[49.3129,19.9767],[49.3099,19.9694],[49.3084,19.962],[49.306,19.9589],[49.3016,19.9568],[49.2992,19.9496]]},{"km":18,"min":58,"g":[[49.2992,19.9496],[49.2991,19.9489],[49.2968,19.9484],[49.2957,19.9462],[49.2933,19.9428],[49.2922,19.9382],[49.291,19.9362],[49.29,19.9334],[49.289,19.9325],[49.2865,19.9291],[49.2846,19.9235],[49.28,19.9117],[49.2784,19.9059],[49.2778,19.9012],[49.2772,19.9002],[49.2754,19.8989],[49.2746,19.8972],[49.2744,19.8959],[49.2748,19.8938],[49.2745,19.8908],[49.2746,19.8898],[49.2765,19.8869],[49.2772,19.8813],[49.2759,19.8754],[49.2753,19.8712],[49.2755,19.8688],[49.2722,19.869],[49.2641,19.87],[49.2639,19.8698],[49.264,19.8693],[49.2652,19.8677],[49.2643,19.8658],[49.2652,19.8677],[49.2639,19.8695],[49.2641,19.87],[49.271,19.869],[49.2755,19.8688],[49.2753,19.8712],[49.2772,19.882],[49.2765,19.8871],[49.2746,19.8898],[49.2745,19.8908],[49.2748,19.8938],[49.2744,19.8959],[49.2745,19.897],[49.2754,19.8989],[49.2771,19.9001],[49.2778,19.901],[49.2784,19.9059],[49.28,19.9117],[49.2846,19.9235],[49.2865,19.9291],[49.2889,19.9324],[49.29,19.9334],[49.291,19.9362],[49.2922,19.9382],[49.2933,19.9428],[49.2957,19.9462],[49.2968,19.9484],[49.2987,19.9489],[49.299,19.9493],[49.2995,19.9521],[49.2997,19.9519],[49.2992,19.9496]]},{"km":124,"min":155,"g":[[49.2992,19.9496],[49.3015,19.9567],[49.3084,19.962],[49.3127,19.9764],[49.3339,20.0017],[49.3586,20.0069],[49.3655,20.0019],[49.3929,20.0166],[49.4244,20.0194],[49.4319,20.0509],[49.4379,20.066],[49.4365,20.0853],[49.4493,20.0918],[49.4644,20.0957],[49.4597,20.1082],[49.4589,20.1183],[49.4608,20.1333],[49.4688,20.1458],[49.4721,20.1629],[49.4732,20.177],[49.4708,20.1952],[49.4627,20.2067],[49.4466,20.223],[49.4424,20.2338],[49.4394,20.236],[49.4381,20.2471],[49.4291,20.2647],[49.4298,20.2739],[49.427,20.2693],[49.425,20.275],[49.4272,20.2922],[49.4262,20.3049],[49.4237,20.3071],[49.4215,20.3193],[49.4186,20.3192],[49.4168,20.3139],[49.4161,20.3197],[49.4073,20.3247],[49.4062,20.3328],[49.4092,20.3449],[49.4084,20.3504],[49.4115,20.3493],[49.4139,20.3441],[49.4197,20.3425],[49.4231,20.3454],[49.4245,20.3507],[49.4263,20.3454],[49.4284,20.3525],[49.4281,20.3597],[49.4331,20.3562],[49.4374,20.3617],[49.437,20.3787],[49.4399,20.3985],[49.4386,20.4064],[49.4419,20.4314],[49.4353,20.4394],[49.4263,20.4455],[49.4256,20.4626],[49.4275,20.4702],[49.4251,20.4826],[49.4288,20.4874],[49.427,20.4871],[49.4252,20.4867],[49.4288,20.4874],[49.4251,20.4826],[49.4275,20.4702],[49.4256,20.4626],[49.4263,20.4455],[49.4353,20.4394],[49.442,20.4313],[49.4386,20.4065],[49.4399,20.3985],[49.437,20.3791],[49.437,20.3649],[49.4512,20.3304],[49.4502,20.3166],[49.4521,20.3092],[49.4492,20.3024],[49.4515,20.2938],[49.4509,20.2877],[49.4535,20.2836],[49.4534,20.275],[49.457,20.2622],[49.4616,20.2568],[49.466,20.2442],[49.4648,20.2396],[49.4677,20.2264],[49.4665,20.2202],[49.469,20.2123],[49.4732,20.1776],[49.4689,20.1455],[49.4626,20.1374],[49.4597,20.1272],[49.4592,20.1108],[49.4648,20.0956],[49.4493,20.0919],[49.4365,20.0853],[49.4379,20.066],[49.4319,20.0509],[49.4244,20.0194],[49.3929,20.0166],[49.3655,20.0019],[49.3586,20.0069],[49.3339,20.0017],[49.3127,19.9764],[49.3084,19.962],[49.3016,19.9568],[49.2992,19.9496]]},{"km":106,"min":102,"g":[[49.2992,19.9496],[49.3343,20.0019],[49.4634,20.0225],[49.4691,20.0043],[49.49,19.9864],[49.507,19.9892],[49.5208,19.9731],[49.5401,19.9706],[49.5537,19.9402],[49.5732,19.9477],[49.5862,19.9324],[49.6156,19.9252],[49.6726,19.888],[49.6933,19.9034],[49.7014,19.963],[49.7168,19.9817],[49.7765,19.9573],[49.7947,19.9237],[49.813,19.9226],[49.8286,19.9512],[49.8372,19.9488],[49.8581,19.9093],[49.877,19.9037],[49.8796,19.8783],[49.907,19.8697],[49.937,19.8952],[49.9593,19.8887],[49.969,19.9049],[50.0363,19.941],[50.0489,19.9327],[50.055,19.9446],[50.062,19.9363]]}],"v3":[{"km":121,"min":104,"g":[[50.0749,19.7898],[50.0684,19.7906],[50.0739,19.8096],[50.0427,19.8074],[49.9975,19.8553],[49.9907,19.9157],[49.9688,19.9046],[49.9594,19.8886],[49.937,19.895],[49.9069,19.8695],[49.8794,19.8781],[49.8769,19.9036],[49.858,19.9092],[49.8372,19.9487],[49.8287,19.9511],[49.8131,19.9225],[49.7947,19.9235],[49.7764,19.9572],[49.717,19.9815],[49.7015,19.9628],[49.6934,19.9032],[49.6721,19.8877],[49.6155,19.925],[49.5862,19.9322],[49.5732,19.9475],[49.5541,19.9398],[49.5394,19.9709],[49.469,20.0024],[49.4774,20.0167],[49.4765,20.0504],[49.4598,20.0665],[49.4669,20.0838],[49.4588,20.117],[49.4721,20.1629],[49.4708,20.195],[49.4381,20.239],[49.425,20.275],[49.4213,20.3196]]},{"km":45,"min":82,"g":[[49.4213,20.3196],[49.4199,20.3203],[49.4185,20.319],[49.4168,20.3139],[49.4164,20.3192],[49.4157,20.3198],[49.4161,20.3148],[49.4158,20.3091],[49.4145,20.3057],[49.4115,20.3026],[49.4117,20.2995],[49.4131,20.2951],[49.4161,20.3018],[49.4173,20.3018],[49.4192,20.3038],[49.4197,20.3031],[49.4192,20.3038],[49.4173,20.3018],[49.4161,20.3018],[49.4131,20.2952],[49.4117,20.2995],[49.4115,20.3026],[49.4144,20.3055],[49.4157,20.3084],[49.4161,20.3121],[49.416,20.3183],[49.4152,20.3202],[49.4123,20.3208],[49.4076,20.3242],[49.4055,20.3302],[49.4055,20.3315],[49.4073,20.3353],[49.4072,20.3417],[49.4092,20.3449],[49.409,20.3462],[49.4078,20.3481],[49.408,20.35],[49.4094,20.3508],[49.4114,20.3494],[49.4139,20.3441],[49.4151,20.344],[49.4163,20.3428],[49.4178,20.3438],[49.4195,20.3425],[49.4211,20.3443],[49.4231,20.3454],[49.4245,20.3506],[49.4251,20.3502],[49.4253,20.3457],[49.4259,20.3451],[49.4263,20.3456],[49.4268,20.3491],[49.4282,20.3513],[49.4294,20.3515],[49.4344,20.3464],[49.4385,20.3376],[49.4395,20.3367],[49.4406,20.3372],[49.4412,20.3387],[49.4404,20.3449],[49.4412,20.346],[49.4422,20.3459],[49.4454,20.3405],[49.4468,20.3405],[49.4509,20.3318],[49.4513,20.3301],[49.4515,20.3218],[49.4502,20.3166],[49.4506,20.3153],[49.452,20.3133],[49.4521,20.3092],[49.4495,20.3038],[49.4493,20.3016],[49.4498,20.2977],[49.4515,20.2938],[49.4509,20.2876],[49.4535,20.2836],[49.4534,20.275],[49.4572,20.2617],[49.4543,20.2596],[49.4535,20.2599],[49.4543,20.2596],[49.4572,20.2617],[49.4534,20.275],[49.4535,20.2835],[49.4509,20.2876],[49.4515,20.2937],[49.4498,20.2975],[49.4493,20.3016],[49.4495,20.3038],[49.452,20.3089],[49.4519,20.3133],[49.4503,20.3159],[49.4489,20.3168],[49.4481,20.3209],[49.4441,20.3294],[49.4423,20.3319],[49.4398,20.3324],[49.4396,20.3307],[49.4391,20.3306],[49.4398,20.3222],[49.4385,20.3172],[49.4392,20.3159],[49.4382,20.3112],[49.4375,20.3105],[49.4369,20.3109],[49.437,20.3141],[49.437,20.3134],[49.4369,20.3109],[49.4375,20.3105],[49.4383,20.3114],[49.4392,20.3159],[49.4385,20.3172],[49.4398,20.3222],[49.4391,20.3306],[49.4381,20.3314],[49.439,20.3332],[49.4392,20.3368],[49.4344,20.3464],[49.4297,20.3513],[49.4288,20.3516],[49.4266,20.3488],[49.4261,20.3452],[49.4253,20.3456],[49.4254,20.3484],[49.4246,20.3507],[49.4228,20.3451],[49.4211,20.3443],[49.4197,20.3425],[49.4177,20.3438],[49.4162,20.3429],[49.4151,20.344],[49.4136,20.3444],[49.4113,20.3495],[49.4096,20.3508],[49.4082,20.3503],[49.4078,20.3483],[49.409,20.3462],[49.4092,20.3449],[49.4073,20.3418],[49.4073,20.335],[49.4054,20.3309],[49.4071,20.3252],[49.4093,20.3226],[49.4107,20.3224],[49.4124,20.3208],[49.4161,20.3197],[49.4168,20.3139],[49.4185,20.319],[49.4198,20.3203],[49.4213,20.3196]]},{"km":42,"min":62,"g":[[49.4213,20.3196],[49.4199,20.3203],[49.4185,20.319],[49.4168,20.3139],[49.4161,20.3197],[49.4123,20.3208],[49.4108,20.3223],[49.4092,20.3227],[49.4073,20.3247],[49.4054,20.3305],[49.4062,20.3328],[49.4073,20.3353],[49.4072,20.3417],[49.4092,20.3449],[49.409,20.3462],[49.4078,20.3484],[49.4084,20.3504],[49.4096,20.3508],[49.4115,20.3493],[49.4139,20.3441],[49.4151,20.344],[49.4163,20.3428],[49.4178,20.3438],[49.4197,20.3425],[49.4209,20.3442],[49.4231,20.3454],[49.4245,20.3507],[49.4251,20.35],[49.4253,20.3456],[49.4263,20.3454],[49.4265,20.3484],[49.4282,20.3513],[49.4284,20.3525],[49.4275,20.3576],[49.4281,20.3597],[49.4312,20.3565],[49.4331,20.3562],[49.4359,20.3589],[49.4374,20.3617],[49.4368,20.3639],[49.4372,20.3642],[49.4366,20.3709],[49.437,20.3787],[49.4375,20.3816],[49.4391,20.3858],[49.4385,20.3924],[49.4399,20.3985],[49.4388,20.4026],[49.4386,20.4064],[49.4395,20.4092],[49.4406,20.4163],[49.4404,20.4237],[49.4419,20.4314],[49.4353,20.4394],[49.4272,20.4435],[49.4263,20.4455],[49.4258,20.4479],[49.4262,20.456],[49.4256,20.4626],[49.426,20.4646],[49.4273,20.4661],[49.4275,20.4702],[49.4269,20.4741],[49.427,20.4771],[49.4251,20.4826],[49.4261,20.4846],[49.4288,20.4874],[49.427,20.4871],[49.4252,20.4867],[49.4288,20.4874],[49.4261,20.4846],[49.4251,20.4826],[49.427,20.4771],[49.4269,20.4741],[49.4275,20.4702],[49.4273,20.4661],[49.426,20.4646],[49.4256,20.4626],[49.4262,20.456],[49.4258,20.4479],[49.4263,20.4455],[49.4272,20.4435],[49.4353,20.4394],[49.442,20.4311],[49.4404,20.4237],[49.4406,20.4163],[49.4395,20.4092],[49.4386,20.4064],[49.4388,20.4027],[49.4399,20.3985],[49.4385,20.3924],[49.4392,20.386],[49.4375,20.3816],[49.437,20.3787],[49.4366,20.3709],[49.4373,20.3614],[49.4359,20.3589],[49.4331,20.3562],[49.4312,20.3565],[49.4281,20.3597],[49.4275,20.3576],[49.4284,20.3525],[49.4282,20.3513],[49.4265,20.3484],[49.4263,20.3454],[49.4253,20.3456],[49.4251,20.35],[49.4245,20.3507],[49.4231,20.3454],[49.4209,20.3442],[49.4197,20.3425],[49.4178,20.3438],[49.4163,20.3428],[49.4151,20.344],[49.4139,20.3441],[49.4117,20.3491],[49.4097,20.3507],[49.4086,20.3506],[49.4078,20.3493],[49.4079,20.3479],[49.409,20.3462],[49.4092,20.3449],[49.4073,20.3418],[49.4073,20.335],[49.4054,20.3307],[49.4072,20.3249],[49.4092,20.3227],[49.4108,20.3223],[49.4123,20.3208],[49.4161,20.3197],[49.4168,20.3139],[49.4185,20.319],[49.4198,20.3203],[49.4213,20.3196]]},{"km":168,"min":226,"g":[[49.4213,20.3196],[49.4168,20.3139],[49.4161,20.3197],[49.4075,20.3244],[49.3953,20.3547],[49.3833,20.3607],[49.3523,20.3623],[49.334,20.3437],[49.3355,20.3139],[49.3144,20.3041],[49.2946,20.283],[49.2888,20.2863],[49.294,20.2827],[49.3144,20.3041],[49.3266,20.3062],[49.3312,20.3149],[49.3356,20.3141],[49.336,20.3227],[49.3338,20.3434],[49.2977,20.3803],[49.2926,20.4211],[49.2881,20.4318],[49.2751,20.4264],[49.2732,20.4182],[49.2668,20.427],[49.262,20.4219],[49.226,20.4255],[49.1919,20.4469],[49.2031,20.4071],[49.2134,20.3467],[49.2203,20.3328],[49.2067,20.3096],[49.1886,20.2933],[49.1829,20.2896],[49.1714,20.2936],[49.1628,20.2723],[49.1553,20.2709],[49.1503,20.2524],[49.1401,20.2362],[49.1398,20.2209],[49.1317,20.2003],[49.1258,20.1956],[49.1168,20.1641],[49.1172,20.1252],[49.1206,20.1133],[49.1173,20.1135],[49.1179,20.0994],[49.1147,20.094],[49.1169,20.0828],[49.1107,20.0763],[49.1124,20.068],[49.1199,20.0668],[49.1189,20.0617],[49.1199,20.0668],[49.1124,20.068],[49.1107,20.0763],[49.1169,20.0828],[49.1147,20.094],[49.1179,20.0994],[49.1173,20.1135],[49.1206,20.1133],[49.1172,20.1252],[49.1168,20.1641],[49.1258,20.1956],[49.1317,20.2003],[49.1398,20.2209],[49.1401,20.2362],[49.1503,20.2524],[49.1553,20.2709],[49.1629,20.2729],[49.1714,20.2936],[49.1829,20.2896],[49.1886,20.2933],[49.2067,20.3096],[49.2203,20.3328],[49.2323,20.3135],[49.2488,20.3105],[49.2658,20.294],[49.2708,20.2798],[49.273,20.2322],[49.2804,20.209],[49.2763,20.2008],[49.278,20.1883],[49.2744,20.1883],[49.2803,20.1758],[49.3091,20.158],[49.3243,20.1548],[49.3589,20.1303],[49.3447,20.1139],[49.3394,20.1009],[49.3296,20.0965],[49.3373,20.0606],[49.3322,20.0444],[49.3317,20.0145],[49.3393,20.0026],[49.332,20.0002],[49.3129,19.9767],[49.3084,19.962],[49.2992,19.9496]]},{"km":142,"min":148,"g":[[49.2992,19.9496],[49.3129,19.9767],[49.34,20.003],[49.3317,20.0144],[49.3373,20.0606],[49.3297,20.0978],[49.3008,20.1184],[49.2874,20.1122],[49.2728,20.121],[49.255,20.1033],[49.2726,20.1209],[49.2864,20.1124],[49.3007,20.1184],[49.3318,20.0963],[49.3556,20.1257],[49.3997,20.1073],[49.4747,20.0539],[49.4775,20.0167],[49.4692,20.0044],[49.4888,19.9874],[49.507,19.9892],[49.5208,19.9731],[49.5396,19.971],[49.5541,19.94],[49.5732,19.9477],[49.5862,19.9324],[49.6156,19.9252],[49.6718,19.8881],[49.6929,19.9025],[49.7014,19.963],[49.7168,19.9817],[49.7765,19.9573],[49.7947,19.9237],[49.813,19.9226],[49.8286,19.9512],[49.8372,19.9488],[49.8581,19.9093],[49.877,19.9037],[49.8796,19.8783],[49.907,19.8697],[49.937,19.8952],[49.9593,19.8887],[49.969,19.9049],[50.0363,19.941],[50.0489,19.9327],[50.055,19.9446],[50.062,19.9363]]}],"v4":[{"km":113,"min":100,"g":[[50.0749,19.7898],[50.0684,19.7906],[50.0739,19.8096],[50.0427,19.8074],[49.9975,19.8553],[49.991,19.9156],[49.9688,19.9046],[49.9594,19.8886],[49.937,19.895],[49.9069,19.8695],[49.8794,19.8781],[49.8769,19.9036],[49.858,19.9092],[49.8373,19.9486],[49.8287,19.9511],[49.8131,19.9225],[49.7945,19.9236],[49.7836,19.9501],[49.7413,19.9775],[49.7168,19.9815],[49.7072,19.972],[49.6938,19.9042],[49.674,19.8876],[49.6155,19.925],[49.5862,19.9322],[49.5732,19.9475],[49.5539,19.9399],[49.54,19.9704],[49.5212,19.9728],[49.5069,19.9891],[49.4903,19.9861],[49.4628,20.0203],[49.3344,20.0019],[49.2992,19.9496]]},{"km":146,"min":210,"g":[[49.2992,19.9496],[49.3015,19.9567],[49.3084,19.962],[49.3129,19.9767],[49.332,20.0002],[49.34,20.003],[49.338,20.0025],[49.3317,20.0144],[49.3322,20.0444],[49.3373,20.0606],[49.3333,20.0722],[49.334,20.0782],[49.3295,20.0968],[49.3394,20.1009],[49.3447,20.1139],[49.3502,20.1174],[49.3535,20.1248],[49.3574,20.1251],[49.3589,20.1299],[49.3552,20.134],[49.3468,20.1355],[49.3424,20.1403],[49.3453,20.1429],[49.3473,20.15],[49.3468,20.1595],[49.3497,20.1653],[49.3505,20.1751],[49.3475,20.175],[49.3431,20.2016],[49.3369,20.206],[49.3327,20.2174],[49.3335,20.2237],[49.3291,20.2262],[49.3343,20.2299],[49.3387,20.254],[49.334,20.2705],[49.3433,20.284],[49.3347,20.3013],[49.3261,20.3065],[49.3144,20.3041],[49.294,20.2827],[49.288,20.2845],[49.2888,20.2863],[49.288,20.2845],[49.294,20.2827],[49.3144,20.3041],[49.3266,20.3062],[49.3322,20.3128],[49.3312,20.3149],[49.3356,20.3141],[49.3337,20.3207],[49.336,20.3227],[49.3343,20.3251],[49.3338,20.3434],[49.3288,20.3445],[49.3151,20.3664],[49.3091,20.3661],[49.2977,20.3803],[49.2957,20.3895],[49.2957,20.401],[49.2915,20.4118],[49.2937,20.4101],[49.2918,20.4132],[49.2926,20.4211],[49.2887,20.426],[49.2902,20.4279],[49.2881,20.4318],[49.282,20.4306],[49.2784,20.4254],[49.2751,20.4264],[49.2732,20.4182],[49.2701,20.4197],[49.2668,20.427],[49.262,20.4219],[49.226,20.4255],[49.2216,20.4319],[49.192,20.447],[49.2031,20.4071],[49.2111,20.3685],[49.2134,20.3467],[49.2203,20.3328],[49.2154,20.3292],[49.2064,20.3093],[49.1949,20.3016],[49.1836,20.2897],[49.1778,20.294],[49.1718,20.2939],[49.1659,20.2793],[49.1635,20.2811],[49.1648,20.2798],[49.1621,20.2785],[49.1637,20.2763],[49.1656,20.2784],[49.1718,20.2939],[49.1778,20.294],[49.1836,20.2897],[49.1949,20.3016],[49.2064,20.3093],[49.2154,20.3292],[49.2203,20.3328],[49.2324,20.3134],[49.2436,20.3093],[49.2487,20.3106],[49.2549,20.3025],[49.263,20.3006],[49.2668,20.2861],[49.2708,20.2798],[49.2713,20.273],[49.2696,20.2662],[49.2732,20.2499],[49.2729,20.2329],[49.2804,20.209],[49.2777,20.2064],[49.2763,20.2008],[49.278,20.1883],[49.2744,20.1883],[49.2803,20.1758],[49.2882,20.1746],[49.2955,20.1653],[49.3091,20.158],[49.3243,20.1548],[49.3468,20.1355],[49.3551,20.134],[49.3588,20.1306],[49.3574,20.1247],[49.3535,20.1248],[49.3502,20.1174],[49.3447,20.1139],[49.3394,20.1009],[49.3296,20.0965],[49.334,20.0782],[49.3333,20.0722],[49.3373,20.0606],[49.3322,20.0444],[49.3317,20.0145],[49.3393,20.0026],[49.332,20.0002],[49.3129,19.9767],[49.3084,19.962],[49.3016,19.9568],[49.2992,19.9496]]},{"km":151,"min":175,"g":[[49.2992,19.9496],[49.3015,19.9567],[49.3084,19.962],[49.3129,19.9767],[49.332,20.0002],[49.34,20.003],[49.338,20.0025],[49.3317,20.0144],[49.3322,20.0444],[49.3373,20.0606],[49.3333,20.0722],[49.334,20.0782],[49.3295,20.0968],[49.3394,20.1009],[49.3447,20.1139],[49.3502,20.1174],[49.3535,20.1248],[49.3575,20.1252],[49.3589,20.1303],[49.3552,20.134],[49.3468,20.1355],[49.3243,20.1548],[49.3092,20.158],[49.2955,20.1653],[49.2882,20.1746],[49.2803,20.1758],[49.2744,20.1883],[49.278,20.1883],[49.2763,20.2008],[49.2777,20.2064],[49.2804,20.209],[49.273,20.2322],[49.2732,20.2499],[49.2696,20.2662],[49.2713,20.273],[49.2708,20.2798],[49.2668,20.2861],[49.2658,20.294],[49.2631,20.3005],[49.2549,20.3025],[49.2488,20.3105],[49.2436,20.3093],[49.2323,20.3135],[49.2203,20.3325],[49.2154,20.3292],[49.2067,20.3096],[49.1949,20.3016],[49.1886,20.2933],[49.1829,20.2896],[49.1778,20.294],[49.1714,20.2936],[49.1706,20.2881],[49.1673,20.2844],[49.1628,20.2723],[49.1553,20.2709],[49.1502,20.2589],[49.1503,20.2524],[49.1459,20.2481],[49.1401,20.2362],[49.1385,20.2298],[49.1409,20.2247],[49.1398,20.2209],[49.1323,20.2058],[49.1317,20.2003],[49.1258,20.1956],[49.1257,20.1873],[49.1225,20.1838],[49.1212,20.1713],[49.1168,20.1641],[49.1193,20.1443],[49.1172,20.1388],[49.1194,20.1322],[49.1172,20.1252],[49.1206,20.1133],[49.1173,20.1135],[49.1163,20.1033],[49.1179,20.0994],[49.1147,20.094],[49.1169,20.0828],[49.1107,20.0763],[49.1124,20.068],[49.118,20.069],[49.1199,20.0668],[49.1189,20.0617],[49.1199,20.0668],[49.1124,20.068],[49.1107,20.0763],[49.1169,20.0828],[49.1147,20.094],[49.1179,20.0994],[49.1163,20.1033],[49.1173,20.1135],[49.1206,20.1133],[49.1172,20.1252],[49.1194,20.1322],[49.1172,20.1388],[49.1193,20.1443],[49.1168,20.1641],[49.1212,20.1713],[49.1225,20.1838],[49.1257,20.1873],[49.1258,20.1956],[49.1317,20.2003],[49.1323,20.2058],[49.1398,20.2209],[49.1409,20.2247],[49.1385,20.2298],[49.1401,20.2362],[49.1459,20.2481],[49.1503,20.2524],[49.1502,20.2589],[49.1553,20.2709],[49.1629,20.2729],[49.1673,20.2844],[49.1706,20.2881],[49.1714,20.2936],[49.1778,20.294],[49.1829,20.2896],[49.1886,20.2933],[49.1949,20.3016],[49.2067,20.3096],[49.2154,20.3292],[49.2203,20.3328],[49.2323,20.3135],[49.2436,20.3093],[49.2488,20.3105],[49.2549,20.3025],[49.2631,20.3005],[49.2658,20.294],[49.2668,20.2861],[49.2708,20.2798],[49.2713,20.273],[49.2696,20.2662],[49.2732,20.2499],[49.273,20.2322],[49.2804,20.209],[49.2777,20.2064],[49.2763,20.2008],[49.278,20.1883],[49.2744,20.1883],[49.2803,20.1758],[49.2882,20.1746],[49.2955,20.1653],[49.3091,20.158],[49.3243,20.1548],[49.3468,20.1355],[49.3551,20.134],[49.3589,20.1303],[49.3574,20.1247],[49.3535,20.1248],[49.3502,20.1174],[49.3447,20.1139],[49.3394,20.1009],[49.3296,20.0965],[49.334,20.0782],[49.3333,20.0722],[49.3373,20.0606],[49.3322,20.0444],[49.3317,20.0145],[49.3393,20.0026],[49.332,20.0002],[49.3129,19.9767],[49.3084,19.962],[49.3016,19.9568],[49.2992,19.9496]]},{"km":45,"min":95,"g":[[49.2992,19.9496],[49.2968,19.9484],[49.2933,19.9428],[49.29,19.9334],[49.2865,19.9291],[49.28,19.9117],[49.2778,19.9012],[49.2746,19.8972],[49.2746,19.8898],[49.2765,19.8869],[49.2772,19.8813],[49.2755,19.8688],[49.2722,19.869],[49.2639,19.8698],[49.2652,19.8677],[49.2643,19.8658],[49.2652,19.8677],[49.2641,19.87],[49.2755,19.8688],[49.2787,19.8638],[49.2796,19.8592],[49.2939,19.8469],[49.2959,19.8416],[49.3046,19.8366],[49.3081,19.8364],[49.311,19.832],[49.3191,19.826],[49.3211,19.8265],[49.3261,19.8242],[49.3484,19.8223],[49.357,19.8189],[49.3714,19.8166],[49.3765,19.8189],[49.3779,19.8219],[49.3783,19.8292],[49.3759,19.8268],[49.3727,19.8209],[49.3714,19.8191],[49.3713,19.8166],[49.357,19.8189],[49.3485,19.8223],[49.3261,19.8242],[49.3211,19.8265],[49.3192,19.826],[49.311,19.832],[49.3081,19.8364],[49.3046,19.8366],[49.296,19.8415],[49.2939,19.8469],[49.2795,19.8593],[49.2788,19.8636],[49.2754,19.8692],[49.2772,19.882],[49.2765,19.8871],[49.2746,19.8898],[49.2745,19.8968],[49.2778,19.9012],[49.28,19.9117],[49.2865,19.9291],[49.29,19.9334],[49.2933,19.9428],[49.2968,19.9484],[49.299,19.9493],[49.2995,19.9521],[49.2992,19.9496]]},{"km":184,"min":191,"g":[[49.2992,19.9496],[49.3339,20.0017],[49.4244,20.0194],[49.4379,20.066],[49.4365,20.0853],[49.4645,20.0958],[49.4597,20.1272],[49.4732,20.1776],[49.466,20.2442],[49.4509,20.2877],[49.4512,20.3304],[49.437,20.3649],[49.4419,20.4314],[49.4263,20.4455],[49.427,20.4871],[49.4263,20.4455],[49.442,20.4313],[49.437,20.3649],[49.4512,20.3304],[49.4509,20.2877],[49.466,20.2442],[49.4732,20.1776],[49.4588,20.117],[49.4669,20.0841],[49.4601,20.0665],[49.4767,20.0506],[49.4715,20.0016],[49.5396,19.971],[49.5541,19.94],[49.5732,19.9477],[49.5862,19.9324],[49.6156,19.9252],[49.6729,19.888],[49.6933,19.9034],[49.7014,19.963],[49.7168,19.9817],[49.7765,19.9573],[49.7947,19.9237],[49.813,19.9226],[49.8286,19.9512],[49.8372,19.9488],[49.8581,19.9093],[49.877,19.9037],[49.8796,19.8783],[49.907,19.8697],[49.937,19.8952],[49.9593,19.8887],[49.969,19.9049],[50.0363,19.941],[50.0489,19.9327],[50.055,19.9446],[50.062,19.9363]]}]};
+const GAL = {"lomnicky": ["https://thumb.wikimedia.org/wikipedia/commons/thumb/d/df/Image-Lomnicky_stit_from_Slavkovsky_stit_2.jpg/960px-Image-Lomnicky_stit_from_Slavkovsky_stit_2.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/22/East_high_Tatras.jpg/960px-East_high_Tatras.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/91/HighTatras12Slovakia2.JPG/960px-HighTatras12Slovakia2.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/70/HighTatras12Slovakia1.JPG/960px-HighTatras12Slovakia1.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/30/JKrajnak-Tatry07.jpg/960px-JKrajnak-Tatry07.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/36/I10_254_Lomnick%C3%BD%2C_Kolov%C3%BD_%C5%A1tit.jpg/960px-I10_254_Lomnick%C3%BD%2C_Kolov%C3%BD_%C5%A1tit.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bd/Kamz%C3%AD%C4%8Dia_jasky%C5%88a_Lomnick%C3%BD_%C5%A1t%C3%ADt.jpg/960px-Kamz%C3%AD%C4%8Dia_jasky%C5%88a_Lomnick%C3%BD_%C5%A1t%C3%ADt.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail"], "morskie": ["https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4d/20181006_Morskie_Oko_0905_9902_DxO.jpg/960px-20181006_Morskie_Oko_0905_9902_DxO.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b8/2018-07-02_Morskie_Oko%2C_Tatra_National_Park%2C_Poland.jpg/960px-2018-07-02_Morskie_Oko%2C_Tatra_National_Park%2C_Poland.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b9/Czarny_Staw_i_Morskie_Oko.JPG/960px-Czarny_Staw_i_Morskie_Oko.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1c/Czarny_Staw_i_Morskie_Oko_widok_z_Rys%C3%B3w.jpg/960px-Czarny_Staw_i_Morskie_Oko_widok_z_Rys%C3%B3w.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/28/Czarny_Staw_pod_Rysami_a1.jpg/960px-Czarny_Staw_pod_Rysami_a1.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4d/2022_Morskie_Oko%2C_wybrze%C5%BCe_przy_schronisku%2C_1.jpg/960px-2022_Morskie_Oko%2C_wybrze%C5%BCe_przy_schronisku%2C_1.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/92/Czarnostawianska_Siklawa.JPG/960px-Czarnostawianska_Siklawa.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/50/2011-06_Tatry_Morskie_Oko_%2B_Czarny_Staw_%2810%29.jpg/960px-2011-06_Tatry_Morskie_Oko_%2B_Czarny_Staw_%2810%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail"], "dunajec": ["https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5d/Rafting_on_the_Dunajec_River.jpg/960px-Rafting_on_the_Dunajec_River.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/88/Rafting_on_the_Dunajec_River%2C_Pieniny_Mountains.jpg/960px-Rafting_on_the_Dunajec_River%2C_Pieniny_Mountains.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ae/2011-05_Pieni%C5%84ski_Park_Narodowy_-_prze%C5%82om_Dunajca_%286%29.jpg/960px-2011-05_Pieni%C5%84ski_Park_Narodowy_-_prze%C5%82om_Dunajca_%286%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9a/2011-05_Pieni%C5%84ski_Park_Narodowy_-_prze%C5%82om_Dunajca_%288%29.jpg/960px-2011-05_Pieni%C5%84ski_Park_Narodowy_-_prze%C5%82om_Dunajca_%288%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c2/Cerveny_Klastor_plte1.JPG/960px-Cerveny_Klastor_plte1.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/dc/019Pieniny.JPG/960px-019Pieniny.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/df/045Pieniny.JPG/960px-045Pieniny.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail"], "bikepien": ["https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c6/Dunajec_-_Droga_Pieninska_01.jpg/960px-Dunajec_-_Droga_Pieninska_01.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3a/Droga_Pieni%C5%84ska_a1.jpg/960px-Droga_Pieni%C5%84ska_a1.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/44/Droga_Pieni%C5%84ska_a2.jpg/960px-Droga_Pieni%C5%84ska_a2.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c2/Droga_Pieni%C5%84ska_a3.jpg/960px-Droga_Pieni%C5%84ska_a3.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/21/DrogaPieni%C5%84ska-Pocz%C4%85tek-SVK%2C_Czerwony_Klasztor.jpg/960px-DrogaPieni%C5%84ska-Pocz%C4%85tek-SVK%2C_Czerwony_Klasztor.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/97/DrogaPieni%C5%84ska-Ska%C5%82kiIDunajec-SVK%2C_Pieniny.jpg/960px-DrogaPieni%C5%84ska-Ska%C5%82kiIDunajec-SVK%2C_Pieniny.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/de/DrogaPieni%C5%84ska-Odcinek%C5%9Arodkowy-SVK%2C_Pieniny.jpg/960px-DrogaPieni%C5%84ska-Odcinek%C5%9Arodkowy-SVK%2C_Pieniny.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/eb/Droga_Pieni%C5%84ska_P9.jpg/960px-Droga_Pieni%C5%84ska_P9.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail"], "velo": ["https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bb/1573_Jezioro_Czorsztynskie_20050527.jpg/960px-1573_Jezioro_Czorsztynskie_20050527.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/50/Czorsztyn_Lake_on_Dunajec_%28view_from_the_castle_of_Niedzica%29_1.jpg/960px-Czorsztyn_Lake_on_Dunajec_%28view_from_the_castle_of_Niedzica%29_1.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a9/Czorsztyn_Lake_on_Dunajec_%28view_from_the_castle_of_Niedzica%29_2.jpg/960px-Czorsztyn_Lake_on_Dunajec_%28view_from_the_castle_of_Niedzica%29_2.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e5/Czorsztyn_Castle_-_view_onto_Niedzica_-_panoramio.jpg/960px-Czorsztyn_Castle_-_view_onto_Niedzica_-_panoramio.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a2/20170305_Jezioro_Czorszty%C5%84skie_4931.jpg/960px-20170305_Jezioro_Czorszty%C5%84skie_4931.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3b/20180414_Mg%C5%82a_nad_Jeziorem_Czorszty%C5%84skim_2194_DxO.jpg/960px-20180414_Mg%C5%82a_nad_Jeziorem_Czorszty%C5%84skim_2194_DxO.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1f/20180414_Mg%C5%82a_nad_Jeziorem_Czorszty%C5%84skim_2183_DxO.jpg/960px-20180414_Mg%C5%82a_nad_Jeziorem_Czorszty%C5%84skim_2183_DxO.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/91/Czorsztyn_Lake_-_panoramio_-_Ireneusz_Kla%C5%9B_%281%29.jpg/960px-Czorsztyn_Lake_-_panoramio_-_Ireneusz_Kla%C5%9B_%281%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail"], "niedzica": ["https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c0/Castle_Niedzica_2.JPG/960px-Castle_Niedzica_2.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ad/20140705_Zamek_w_Niedzicy_7689.jpg/960px-20140705_Zamek_w_Niedzicy_7689.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/38/20140705_Zamek_w_Niedzicy_7698.jpg/960px-20140705_Zamek_w_Niedzicy_7698.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/09/20180414_Zamek_w_Niedzicy_8832_DxO.jpg/960px-20180414_Zamek_w_Niedzicy_8832_DxO.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1d/20180414_Zamek_w_Niedzicy_2345_DxO.jpg/960px-20180414_Zamek_w_Niedzicy_2345_DxO.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/46/Bart%C5%82omiej_Jacak_2015_%28Unsplash%29.jpg/960px-Bart%C5%82omiej_Jacak_2015_%28Unsplash%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9d/082._Niedzica.JPG/960px-082._Niedzica.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail"], "sokolica": ["https://thumb.wikimedia.org/wikipedia/commons/thumb/d/dd/Sokola_Per%C4%87_%282%29.jpg/960px-Sokola_Per%C4%87_%282%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/03/006Pieniny.JPG/960px-006Pieniny.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e7/0573Pieniny.jpg/960px-0573Pieniny.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c7/Cerveny_Klastor_Trzy_Korony.jpg/960px-Cerveny_Klastor_Trzy_Korony.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c6/Cerveny_Klastor_Dunajec_2.jpg/960px-Cerveny_Klastor_Dunajec_2.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1d/0480Pieniny.jpg/960px-0480Pieniny.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail"], "koscieliska": ["https://thumb.wikimedia.org/wikipedia/commons/thumb/8/86/Brama_Kantaka_1.jpg/960px-Brama_Kantaka_1.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9a/2019-07-09_Droga_Strzelc%C3%B3w_Podhala%C5%84skich%2C_Dolina_Ko%C5%9Bcieliska.jpg/960px-2019-07-09_Droga_Strzelc%C3%B3w_Podhala%C5%84skich%2C_Dolina_Ko%C5%9Bcieliska.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b8/2019-07-09_Dolina_Ko%C5%9Bcieliska.jpg/960px-2019-07-09_Dolina_Ko%C5%9Bcieliska.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bd/2011-06_Tatry_-_Dolina_Ko%C5%9Bcieliska_%283%29.jpg/960px-2011-06_Tatry_-_Dolina_Ko%C5%9Bcieliska_%283%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cf/2011-06_Tatry_-_Dolina_Ko%C5%9Bcieliska_%282%29.jpg/960px-2011-06_Tatry_-_Dolina_Ko%C5%9Bcieliska_%282%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4a/2011-06_Tatry_-_Dolina_Ko%C5%9Bcieliska_%284%29.jpg/960px-2011-06_Tatry_-_Dolina_Ko%C5%9Bcieliska_%284%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/56/2011-06_Tatry_-_Dolina_Ko%C5%9Bcieliska_%288%29.jpg/960px-2011-06_Tatry_-_Dolina_Ko%C5%9Bcieliska_%288%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail"], "gubalowka": ["https://thumb.wikimedia.org/wikipedia/commons/thumb/4/45/Guba%C5%82%C3%B3wka_01.jpg/960px-Guba%C5%82%C3%B3wka_01.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/78/Guba%C5%82%C3%B3wka_02.jpg/960px-Guba%C5%82%C3%B3wka_02.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c6/Guba%C5%82%C3%B3wka_a1.jpg/960px-Guba%C5%82%C3%B3wka_a1.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/65/On_top_of_Guba%C5%82%C3%B3wka.jpg/960px-On_top_of_Guba%C5%82%C3%B3wka.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7a/2019_Guba%C5%82%C3%B3wka%2C_widok_ze_szlaku.jpg/960px-2019_Guba%C5%82%C3%B3wka%2C_widok_ze_szlaku.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/17/Guba%C5%82%C3%B3wka%2C_Poland_in_August_2017%2C_02.jpg/960px-Guba%C5%82%C3%B3wka%2C_Poland_in_August_2017%2C_02.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9f/Gubalowka%2C_Cheese_Smokers%27_Hut_-_panoramio.jpg/960px-Gubalowka%2C_Cheese_Smokers%27_Hut_-_panoramio.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail"], "bachledka": ["https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7f/Dolina_Bachledzka_MS7.jpg/960px-Dolina_Bachledzka_MS7.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3b/Dolina_Bachledzka_MS6.jpg/960px-Dolina_Bachledzka_MS6.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e0/Chodn%C3%ADk_na_stromoch%2C_Bachledova_dolina_21_Slovakia.jpg/960px-Chodn%C3%ADk_na_stromoch%2C_Bachledova_dolina_21_Slovakia.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/13/Sciezka_w_Koronach_Drzew.jpg/960px-Sciezka_w_Koronach_Drzew.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9e/Chodnik_Korunami_Stromov.jpg/960px-Chodnik_Korunami_Stromov.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d7/Chodn%C3%ADk_Korunami_Stromov_%28Treetop_walk%29_%2850359326307%29.jpg/960px-Chodn%C3%ADk_Korunami_Stromov_%28Treetop_walk%29_%2850359326307%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail"], "termy": ["https://thumb.wikimedia.org/wikipedia/commons/thumb/8/82/Terma_Bania_-_panoramio.jpg/960px-Terma_Bania_-_panoramio.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/33/Tatry_seen_from_Bia%C5%82ka_Tatrza%C5%84ska.jpg/960px-Tatry_seen_from_Bia%C5%82ka_Tatrza%C5%84ska.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail"], "krakow": ["https://thumb.wikimedia.org/wikipedia/commons/thumb/3/38/02022_0371_Wawel_Castle.jpg/960px-02022_0371_Wawel_Castle.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ee/Blue_Hour_Castle_%2846874352454%29.jpg/960px-Blue_Hour_Castle_%2846874352454%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b1/Cracovia_en_2024_-_BugWarp_%281%29.jpg/960px-Cracovia_en_2024_-_BugWarp_%281%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3e/Cracovia_en_2024_-_BugWarp_%2812%29.jpg/960px-Cracovia_en_2024_-_BugWarp_%2812%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6c/Cathedral_and_pink_gate_at_Wawel_Castle%2C_Krakow.jpg/960px-Cathedral_and_pink_gate_at_Wawel_Castle%2C_Krakow.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/88/Arcaded_Courtyard_at_Wawel_Castle%2C_Krakow.jpg/960px-Arcaded_Courtyard_at_Wawel_Castle%2C_Krakow.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b4/Bulwar_wi%C5%9Blany_i_Wawel_w_lipcu_2026_r..jpg/960px-Bulwar_wi%C5%9Blany_i_Wawel_w_lipcu_2026_r..jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/01/6523avik_Krakowski_Kazimierz._Foto_Barbara_Maliszewska.jpg/960px-6523avik_Krakowski_Kazimierz._Foto_Barbara_Maliszewska.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail"], "wieliczka": ["https://thumb.wikimedia.org/wikipedia/commons/thumb/1/10/Wieliczka.Kopalnia_Soli_Kaplica_%C5%9Bw.Kingi.jpg/960px-Wieliczka.Kopalnia_Soli_Kaplica_%C5%9Bw.Kingi.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/90/Wieliczka%2C_St_Kingas_Chapel_%286467348331%29.jpg/960px-Wieliczka%2C_St_Kingas_Chapel_%286467348331%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a0/Chapel_of_St._Kinga%2C_Wieliczka_Salt_Mine_%282437283812%29.jpg/960px-Chapel_of_St._Kinga%2C_Wieliczka_Salt_Mine_%282437283812%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/eb/Wieliczka_Salt_Mine%2C_Altar_of_St_Kinga%27s_Chapel_-_panoramio.jpg/960px-Wieliczka_Salt_Mine%2C_Altar_of_St_Kinga%27s_Chapel_-_panoramio.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ab/Salt_miner_%283869579378%29.jpg/960px-Salt_miner_%283869579378%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2a/Nativity_of_Our_Lord_Chapel.jpg/960px-Nativity_of_Our_Lord_Chapel.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail"], "kasprowy": ["https://thumb.wikimedia.org/wikipedia/commons/thumb/2/21/High_Tatras_from_Malolaczniak.jpg/960px-High_Tatras_from_Malolaczniak.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/03/Dolina_Gasienicowa%2C_Kasprowy_Wierch.jpg/960px-Dolina_Gasienicowa%2C_Kasprowy_Wierch.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/31/20161230_Kasprowy_Wierch_2542.jpg/960px-20161230_Kasprowy_Wierch_2542.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8f/20161001_Widok_w_stron%C4%99_Kasprowego_Wierchu_1548.jpg/960px-20161001_Widok_w_stron%C4%99_Kasprowego_Wierchu_1548.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7e/G%C3%B3rna_stacja_Kolei_Linowej_na_Kasprowy_Wierch.jpg/960px-G%C3%B3rna_stacja_Kolei_Linowej_na_Kasprowy_Wierch.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail"], "strbske": ["https://thumb.wikimedia.org/wikipedia/commons/thumb/6/69/Popradske_Pleso.jpg/960px-Popradske_Pleso.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/13/Popradsk%C3%A9_pleso_1.JPG/960px-Popradsk%C3%A9_pleso_1.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/82/Popradsk%C3%A9_pleso%2C_v_pozad%C3%AD_Chata_pri_Popradskom_plese.jpg/960px-Popradsk%C3%A9_pleso%2C_v_pozad%C3%AD_Chata_pri_Popradskom_plese.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c3/Popradsk%C3%A9_pleso_od_n%C3%A1stupov%C3%A9_cesty_do_sedla_pod_Ostrvou.JPG/960px-Popradsk%C3%A9_pleso_od_n%C3%A1stupov%C3%A9_cesty_do_sedla_pod_Ostrvou.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/92/Mengusovsk%C3%A1_dolina%2C_Vysok%C3%A9_Tatry_%2837%29.JPG/960px-Mengusovsk%C3%A1_dolina%2C_Vysok%C3%A9_Tatry_%2837%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail"]};
+const IMG = p => `https://upload.wikimedia.org/wikipedia/commons/thumb/${p}/960px-${p.split('/').pop()}`;
+const DAYC = ['var(--d1)','var(--d2)','var(--d3)','var(--d4)','var(--d5)'];
+const DAYHEX = ['#e0605a','#4f8fe0','#4caf7a','#b26fe0','#e8a849'];
+
+/* ================= currency ================= */
+const FX = {PLN:0.786, EUR:3.441, USD:3.065, GBP:4.046, ILS:1, date:'2026-10-02', live:false};
+const fmt = n => Math.round(n).toLocaleString('he-IL');
+const toILS = (a,c) => a*FX[c];
+function ilsSpan(c,a,b){return `<span class="ils" data-c="${c}" data-a="${a}"${b?` data-b="${b}"`:''}></span>`}
+function ann(s){
+  return s.replace(/€(\d+(?:\.\d+)?)(?:–(\d+(?:\.\d+)?))?/g,(m,a,b)=>m+ilsSpan('EUR',a,b))
+          .replace(/(\d+(?:\.\d+)?)(?:–(\d+))?\s?זל/g,(m,a,b)=>m+ilsSpan('PLN',a,b))
+          .replace(/\$(\d+(?:\.\d+)?)/g,(m,a)=>m+ilsSpan('USD',a))
+          .replace(/£(\d+(?:\.\d+)?)/g,(m,a)=>m+ilsSpan('GBP',a));
+}
+function convert(){
+  const a=+document.getElementById('fxAmt').value||0, c=document.getElementById('fxCur').value;
+  const out=document.getElementById('fxOut');
+  if(c==='ILS') out.textContent=`${fmt(a/FX.PLN)} זל · €${fmt(a/FX.EUR)} · $${fmt(a/FX.USD)}`;
+  else out.textContent=`${fmt(toILS(a,c))} ₪`;
+}
+function refreshFX(){
+  document.querySelectorAll('.ils').forEach(e=>{const c=e.dataset.c,a=+e.dataset.a,b=e.dataset.b?+e.dataset.b:null;
+    e.textContent=` (≈${fmt(toILS(a,c))}${b?`–${fmt(toILS(b,c))}`:''} ₪)`});
+  document.getElementById('fxMini').textContent=`💱 1 זל=${FX.PLN.toFixed(2)}₪ · €1=${FX.EUR.toFixed(2)}₪ · $1=${FX.USD.toFixed(2)}₪`;
+  ['PLN','EUR','USD','GBP'].forEach(c=>{const i=document.getElementById('r'+c); if(document.activeElement!==i) i.value=FX[c].toFixed(3)});
+  document.getElementById('fxSrc').textContent=FX.live?`(עדכני, ${FX.date})`:`(${FX.date})`;
+  document.getElementById('fxQuick').innerHTML=[[10,'PLN'],[50,'PLN'],[100,'PLN'],[500,'PLN'],[10,'EUR'],[50,'EUR'],[100,'EUR']]
+    .map(([a,c])=>`<span>${c==='EUR'?'€'+a:a+' זל'} = ${fmt(toILS(a,c))} ₪</span>`).join('');
+  convert(); renderBudget(); calc();
+  document.querySelectorAll('[data-fuel]').forEach(e=>{const km=+e.dataset.fuel;const lo=km*.065*FUEL_PLN,hi=km*.075*FUEL_PLN;
+    e.textContent=`${fmt(lo)}–${fmt(hi)} זל (≈${fmt(lo*FX.PLN)}–${fmt(hi*FX.PLN)} ₪)`});
+  document.querySelectorAll('[data-budget]').forEach(e=>{const [a,b]=budgetTotal(e.dataset.budget);e.textContent=`${fmt(a)}–${fmt(b)} ₪`});
+  const CAR={kaizen:toILS(68.11,'GBP')+toILS(66.5,'EUR'), express:toILS(54.06,'GBP')+toILS(199,'PLN')};
+  document.querySelectorAll('[data-sum]').forEach(e=>e.textContent=`≈ ${fmt(CAR[e.dataset.sum])} ₪`);
+  document.querySelectorAll('[data-ilsfrom]').forEach(e=>e.textContent=`${fmt(toILS(+e.dataset.amt,e.dataset.ilsfrom))} ₪`);
+  const [a,b]=budgetTotal('v1'); document.getElementById('blA').textContent=`בערך ${fmt(a)}–${fmt(b)} ₪`;
+  const vv=V.find(x=>x.id===curV); if(vv) renderVariant(vv);
+}
+document.getElementById('fxAmt').oninput=convert; document.getElementById('fxCur').onchange=convert;
+['PLN','EUR','USD','GBP'].forEach(c=>document.getElementById('r'+c).oninput=e=>{const v=+e.target.value; if(v>0){FX[c]=v;FX.live=false;FX.date='ידני';refreshFX()}});
+async function loadFX(){
+  try{
+    const r=await fetch('https://api.frankfurter.dev/v1/latest?base=PLN&symbols=ILS,EUR,USD,GBP'); const d=await r.json();
+    if(d.rates&&d.rates.ILS){FX.PLN=d.rates.ILS; FX.EUR=d.rates.ILS/d.rates.EUR; FX.USD=d.rates.ILS/d.rates.USD; FX.GBP=d.rates.ILS/d.rates.GBP; FX.date=d.date; FX.live=true; refreshFX();}
+  }catch(e){}
+}
+
+/* ================= blocks ================= */
+const B = [
+ {id:'lomnicky',ico:'🚡',name:'רכבל לפסגת לומניצקי שטיט',latin:'Lomnický štít · Skalnaté pleso (SK)',cats:['cable','peak','sk'],ll:[49.1953,20.2132],
+  img:IMG('8/84/Lomnicky_stit2.JPG'),hrs:5,cost:{EUR:89},dur:'4–5 שעות',eff:'קל',price:'€89 עד הפסגה (המחיר משתנה לפי ביקוש) · עד Skalnaté pleso בלבד: הרבה יותר זול',
+  st:'ok',season:'פתוח. באוקטובר עולים לסקלנטה פלסו 8:30–15:10 ולפסגה 9:00–15:40. קונים כרטיס רק ביום עצמו, לפי התחזית.',
+  desc:'הכי קרוב לרכבל אוסטרי. עולים בשלושה מקטעים, והאחרון הוא קבינה קטנה לפסגה בגובה 2,634 מ\'. בדרך עוברים באגם קטן בגובה 1,750 מ\'.',
+  combo:'שטרבסקה פלסו אחר הצהריים, ובאכלדקה בדרך',alt:'אם הפסגה בעננים: לעצור בסקלנטה פלסו ולהסתובב סביב האגם'},
+ {id:'strbske',ico:'🏞️',name:'שטרבסקה פלסו ופופרדסקה פלסו',latin:'Štrbské Pleso · Popradské pleso (SK)',cats:['lake','hike','cable','sk'],ll:[49.1190,20.0620],
+  img:IMG('0/00/Strbske_pleso_from_Krivan.jpg'),hrs:2.5,cost:{},dur:'1–3 שעות',eff:'קל עד בינוני',price:'ההליכה חינם · חניה €5–10 · רכבל Solisko €18 הלוך-חזור',
+  st:'ok',season:'פתוח. רכבל Solisko פועל 8:30–16:00.',
+  desc:'אגם הרים גדול עם טיילת: הליכה של 45 דקות מסביב. משם עוד כשעה של הליכה ביער עד פופרדסקה פלסו, אגם בתוך עמק סגור.',
+  combo:'Lomnický באותו יום, בעיקר אם הבוקר בהיר',alt:'רכבל Solisko לנקודת תצפית מעל האגם'},
+ {id:'morskie',ico:'💧',name:'מורסקיה אוקו וצ\'רני סטאב',latin:'Morskie Oko · Czarny Staw',cats:['lake','hike'],ll:[49.2013,20.0713],
+  img:IMG('6/62/Morskie_Oko_08_VIII_2004-0015.jpg'),hrs:6.5,cost:{PLN:11},dur:'6–7 שעות מזקופנה וחזרה',eff:'בינוני (18 ק"מ הלוך-חזור)',price:'כניסה 11 זל · חניה 36–75 זל לרכב (לקנות מראש) · עגלת סוסים: 100 זל עלייה, 70 זל ירידה',
+  st:'ok',season:'פתוח כל השנה. בבוקר פחות אנשים. בעלייה לצ\'רני סטאב יכול להיות קרח.',
+  desc:'האגם הכי מפורסם בפולין, בין קירות סלע. ההליכה היא 9 ק"מ על כביש סלול. משם עוד 45 דקות של עלייה תלולה לאגם צ\'רני סטאב, שנמצא מעליו.',
+  combo:'בערב: בריכות תרמיות כדי להרגיע את הרגליים',alt:'למטיילים חזקים, ורק בלי שלג: עמק חמשת האגמים (8–9 שעות)'},
+ {id:'dunajec',ico:'🛶',name:'רפסודות בקניון הדונאייץ',latin:'Spływ Dunajcem · Sromowce-Kąty → Szczawnica',cats:['river','pieniny'],ll:[49.4060,20.3330],
+  img:IMG('e/ec/Prze%C5%82om_Dunajca_a1.jpg'),hrs:3.5,cost:{PLN:111},dur:'2.5 שעות על המים, ועוד שעה להתארגנות',eff:'קל מאוד',price:'111 זל (18 ק"מ עד שצ\'בניצה)',
+  st:'ok',season:'העונה נמשכת עד 31.10. קר על המים, אז להביא כפפות וכובע. ביום חול מחכים קצת עד שהרפסודה מתמלאת.',
+  desc:'רפסודות עץ עם רפסודאים בלבוש מסורתי. שטים בין הצוקים של רכס פייניני, ובצד השני של הנהר זו כבר סלובקיה.',
+  combo:'אחרי זה אופניים בדרך הפיינינית, כי מסיימים בשצ\'בניצה',alt:'מסלול ארוך יותר, 23 ק"מ עד Krościenko, ב-134 זל'},
+ {id:'bikepien',ico:'🚲',name:'אופניים בדרך הפיינינית',latin:'Droga Pienińska · Szczawnica ↔ Červený Kláštor',cats:['bike','river','pieniny','sk'],ll:[49.4140,20.4500],
+  img:IMG('9/90/Pieniny_Trzy_Korony.jpg'),hrs:3,cost:{PLN:60},dur:'2–3 שעות',eff:'קל (שטוח)',price:'50–60 זל ליום · אופניים חשמליים 150 זל',
+  st:'ok',season:'השכרה פתוחה כל יום: Promenada Bike (ul. Flisacka 3), 9:00–19:00, ‎+48 511 729 379. כדאי להודיע יום לפני.',
+  desc:'כ-10 ק"מ שטוחים לאורך הנהר, בתוך הקניון, ואין שם מכוניות. מתחילים בשצ\'בניצה ומגיעים לצ\'רבני קלאשטור בסלובקיה, ושם יש מנזר עתיק.',
+  combo:'רפסודות באותו יום',alt:'הולכים ברגל באותה דרך'},
+ {id:'velo',ico:'🚴',name:'אופניים מסביב לאגם צ\'ורשטין',latin:'Velo Czorsztyn',cats:['bike','lake','pieniny'],ll:[49.4420,20.2700],
+  img:IMG('4/4d/Widok_na_zbiornik_czorsztynski.jpg'),hrs:4,cost:{PLN:60},dur:'חצי יום',eff:'בינוני (יש עליות)',price:'השכרה ~50 זל · חשמליים ~200 זל (Kluszkowce או ליד המזח)',
+  st:'ok',season:'המעבורת שמקצרת את הלולאה מסיימת את העונה בסביבות 20.10. לכן רוכבים הלוך-חזור ניידיצה–פאלשטין, או את כל הלולאה (44 ק"מ) על חשמליים.',
+  desc:'שביל אופניים סלול מסביב לאגם. רואים את הטטרה באופק, ושתי טירות משני צידי הסכר. רבים אומרים שזה מסלול האופניים הכי יפה בפולין.',
+  combo:'טירת ניידיצה',alt:'רוכבים רק את הקטע ניידיצה–פאלשטין (קל, בערך 10 ק"מ לכל כיוון)'},
+ {id:'niedzica',ico:'🏰',name:'טירת ניידיצה וחורבות צ\'ורשטין',latin:'Zamek Dunajec Niedzica · Czorsztyn',cats:['castle','lake','pieniny','rain'],ll:[49.4214,20.3197],
+  img:IMG('2/20/20170305_Niedzica_zamek_5195.jpg'),hrs:1.5,cost:{PLN:40},dur:'1.5–2 שעות',eff:'קל',price:'40 זל · מוזל 30 זל',
+  st:'ok',season:'באוקטובר ג׳–א׳ 9:00–16:00, כניסה אחרונה 15:20. <b>סגור בשני 19.10.</b>',
+  desc:'טירה על צוק מעל האגם, עם חורבות של טירה נוספת בגדה השנייה. נוף מצוין.',
+  combo:'Velo Czorsztyn, או בדרך לקרקוב ביום האחרון',alt:'תצפית מהחורבות בצ\'ורשטין'},
+ {id:'sokolica',ico:'⛰️',name:'פסגת סוקוליצה או טשי קורוני',latin:'Sokolica · Trzy Korony (Pieniny)',cats:['peak','hike','pieniny'],ll:[49.4115,20.4398],
+  img:IMG('0/01/Sokolica_a1.jpg'),hrs:3.5,cost:{PLN:15},dur:'3–4 שעות',eff:'בינוני',price:'הכניסה לפארק חינם · תצפיות 10 זל (כרטיס אחד לשתיהן) · סירה 6 זל',
+  st:'ok',season:'פתוח. הסירה משצ\'בניצה חוצה את הנהר 8:00–17:00. רכבל הכיסאות Palenica בשצ\'בניצה סגור 19.10–6.11.',
+  desc:'התצפית המפורסמת על הקניון, עם עץ האורן העקום. מטשי קורוני רואים את כל הנהר מלמעלה.',
+  combo:'בבוקר, לפני הרפסודות או האופניים',alt:'טשי קורוני מכיוון קרושצ\'ינקו'},
+ {id:'koscieliska',ico:'🌲',name:'עמק קושצ\'ליסקה',latin:'Dolina Kościeliska',cats:['hike'],ll:[49.2725,19.8730],
+  img:IMG('0/04/Tatry_Dolina_Koscieliska_dron_%281%29.jpg'),hrs:3.5,cost:{PLN:11},dur:'3–4 שעות',eff:'קל (כמעט שטוח)',price:'כניסה 11 זל',
+  st:'ok',season:'פתוח. יפה בסתיו ומתאים גם ליום מעונן.',
+  desc:'עמק רחב בין צוקים, עם נחל, כרי דשא ובקתת הרים בסוף שמגישה מרק חם.',
+  combo:'גובאלובקה ובריכות תרמיות באותו יום',alt:'עמק חוחולובסקה, ארוך יותר'},
+ {id:'gubalowka',ico:'🚞',name:'פוניקולר גובאלובקה ורחוב קרופובקי',latin:'Gubałówka · Krupówki (Zakopane)',cats:['cable','town'],ll:[49.3070,19.9364],
+  img:IMG('5/5f/Pasmo_Guba%C5%82owskie_T57-2.jpg'),hrs:2,cost:{PLN:37},dur:'שעתיים',eff:'קל',price:'37 זל באתר · 42 זל בקופה',
+  st:'ok',season:'פתוח. ההפסקה הטכנית השנה רק ב-16–27.11.',
+  desc:'רכבת עם כבל שמעלה לרכס מעל זקופנה. מלמעלה רואים את כל הטטרה. יורדים למדרחוב קרופובקי.',
+  combo:'בערב של היום הראשון, או בחצי יום',alt:'רכבל הכיסאות Butorowy Wierch'},
+ {id:'bachledka',ico:'🌳',name:'שביל צמרות העצים באכלדקה',latin:'Chodník korunami stromov Bachledka (SK)',cats:['cable','sk'],ll:[49.2900,20.2900],
+  img:'',hrs:2,cost:{EUR:15},dur:'1.5–2 שעות',eff:'קל',price:'€15 לשביל בלבד · €29–30 כולל רכבל',
+  st:'ok',season:'פתוח כל השנה, באוקטובר 9:00–16:00.',
+  desc:'גשר עץ בגובה צמרות העצים, ובסופו מגדל תצפית לכיוון הטטרה הלבנה. נמצא על הדרך מזקופנה ל-Lomnica.',
+  combo:'בדרך ל-Lomnický, או בחזרה ממנו',alt:'—'},
+ {id:'termy',eve:true,ico:'🛁',name:'בריכות תרמיות',latin:'Termy Chochołowskie · Terma Bania',cats:['rain','relax'],ll:[49.3727,19.8208],
+  img:'',hrs:3,cost:{PLN:80},dur:'3 שעות',eff:'אפס',price:'75–85 זל ל-3 שעות ביום חול',
+  st:'ok',season:'פתוח כל השנה. בערב קר בחוץ, ולכן הכי כיף בבריכות החיצוניות.',
+  desc:'בריכות של מים חמים מתחת לאדמה, חלקן בחוץ עם נוף להרים. אחרי יום הליכה זה בדיוק מה שהגוף צריך.',
+  combo:'בערב אחרי מורסקיה אוקו',alt:'Terma Bania בבייאלקה, קרוב יותר למורסקיה אוקו'},
+ {id:'krakow',eve:true,ico:'🏙️',name:'קרקוב: העיר העתיקה וטירת ואוול',latin:'Rynek Główny · Wawel',cats:['town','rain'],ll:[50.0617,19.9373],
+  img:IMG('1/18/Sukiennice_and_Main_Market_Square_Krakow_Poland.JPG'),hrs:3,cost:{},dur:'3–4 שעות',eff:'קל',price:'ההליכה חינם · הכניסה לתערוכות בואוול בתשלום',
+  st:'ok',season:'פתוח.',
+  desc:'הכיכר העתיקה הגדולה באירופה, טירת ואוול על הוויסלה, ורובע קז\'ימייז\' לארוחת ערב.',
+  combo:'בערב האחרון, לפני הלינה ליד השדה',alt:'מכרה המלח וייליצ\'קה'},
+ {id:'wieliczka',ico:'🧂',name:'מכרה המלח וייליצ\'קה',latin:'Kopalnia Soli Wieliczka',cats:['rain'],ll:[49.9833,20.0550],
+  img:IMG('f/f6/Wieliczka_mine_04.jpg'),hrs:3,cost:{PLN:125},dur:'3 שעות',eff:'קל (הרבה מדרגות)',price:'103–125 זל לסיור בפולנית, לפי יום ושעה · סיור באנגלית יקר יותר',
+  st:'ok',season:'פתוח כל השנה ולא תלוי במזג האוויר.',
+  desc:'מכרה מלח מתחת לאדמה, עם אולמות וכנסייה שגולפו כולם במלח. נמצא על הדרך מהדרום לקרקוב.',
+  combo:'ביום האחרון, אם יורד גשם',alt:'—'},
+ {id:'kasprowy',ico:'🚡',name:'קספרובי ויירך',latin:'Kasprowy Wierch',cats:['cable','peak'],ll:[49.2319,19.9817],
+  img:IMG('c/c9/20161001_Widok_ze_%C5%9Awinicy_1664.jpg'),hrs:4,cost:{PLN:129},dur:'—',eff:'—',price:'129 זל (מחיר העונה הנמוכה)',
+  st:'bad',season:'<b>סגור מ-19.10 עד 6.11.2026 להפסקה טכנית.</b>',
+  desc:'הרכבל הכי מפורסם בפולין. בתאריכים שלך הוא לא פועל.',
+  combo:'—',alt:'Lomnický štít בסלובקיה, כשעה מזקופנה'},
+];
+const BI = Object.fromEntries(B.map(b=>[b.id,b]));
+const STXT = {ok:'✅ פתוח',warn:'⚠️ לבדוק',bad:'❌ סגור'};
+B.forEach(b=>{const g=[b.img,...((GAL&&GAL[b.id])||[])].filter(Boolean); b.gal=[...new Set(g)]; b.cover=b.gal[0]||''});
+const costILS = c => Object.entries(c||{}).reduce((s,[k,v])=>s+toILS(v,k),0);
+
+/* ================= variants ================= */
+const V = [
+ {id:'v1',tag:'A',name:'הקלאסי האוסטרי ⭐',sleep:'זקופנה ×3 · שצ\'בניצה ×1 · קרקוב ×1',
+  intro:'מכל דבר קצת: פסגה עם רכבל, אגמי הרים, רפסודות, אופניים, טירה וקרקוב. זה הכי קרוב לטיול באוסטריה.',
+  pros:['הכי מגוון','נהיגה של עד שעה וחצי לכל כיוון, חוץ מיום סלובקיה','בסוף הטיול כבר נמצאים בדרך לקרקוב'],cons:['3 בסיסי לינה','יום סלובקיה ארוך'],
+  days:[
+   {t:'נחיתה → זקופנה',b:['gubalowka'],txt:'13:50 נחיתה, איסוף רכב, ושעתיים נסיעה. בערב טיול בקרופובקי, ואם עוד לא חשוך, עולים לגובאלובקה.',sleep:'זקופנה'},
+   {t:'יום סלובקיה: פסגה ואגם',b:['bachledka','lomnicky','strbske'],txt:'יוצאים ב-7:30. רכבל לפסגת Lomnický, ועוצרים בבאכלדקה בדרך אם יש זמן. אחר הצהריים הולכים סביב שטרבסקה פלסו, וחוזרים דרך Łysa Polana.',sleep:'זקופנה',tip:'את היום הזה שמים על היום הכי בהיר בתחזית. אם ה-19 יוצא גשום, מחליפים עם יום 3. מתדלקים בפולין לפני שיוצאים. צריך רכב עם אישור לסלובקיה.'},
+   {t:'מורסקיה אוקו ובריכות תרמיות',b:['morskie','termy'],txt:'יוצאים ב-7:00 ל-Palenica Białczańska (35 דקות נסיעה). הולכים לאגם, עולים לצ\'רני סטאב, וחוזרים בערך ב-14:30. בערב בריכות תרמיות.',sleep:'זקופנה'},
+   {t:'פייניני: נהר ואופניים',b:['dunajec','bikepien'],txt:'בשעה 10:00 רפסודה מ-Kąty לשצ\'בניצה. אחרי ארוחת צהריים, אופניים בדרך הפיינינית עד סלובקיה וחזרה.',sleep:'שצ\'בניצה',tip:'את הרכב משאירים בחניה של הרפסודות. מפעילי הרפסודות מחזירים אותך אליו באוטובוס.'},
+   {t:'טירה → קרקוב',b:['niedzica','krakow'],txt:'בבוקר טירת ניידיצה ותצפית על האגם. אחר כך שעתיים נסיעה לקרקוב, ובערב העיר העתיקה וקז\'ימייז\'.',sleep:'קרקוב, ליד השדה',tip:'מתדלקים ומלאים את המיכל בערב, כדי לא לחפש תחנה ב-03:00.'},
+  ],
+  budget:{km:570,lodge:[1050,1950],park:{PLN:[60,110],EUR:[5,10]},act:{PLN:339,EUR:89}}},
+ {id:'v3',tag:'B',name:'אופניים ואגמים',sleep:'ניידיצה/צ\'ורשטין ×3 · זקופנה ×1 · קרקוב ×1',
+  intro:'בסיס שקט ליד אגם צ\'ורשטין, ושני ימים של אופניים. אחר כך קופצים לטטרה.',
+  pros:['הכי הרבה אופניים','בסיס שקט ליד אגם עם נוף לטטרה','מעט נהיגה ב-3 הימים הראשונים'],cons:['בלי פסגה גבוהה','ביום האחרון מורסקיה אוקו ואז נסיעה לקרקוב, וזה יום עמוס'],
+  days:[
+   {t:'נחיתה → אגם צ\'ורשטין',b:[],txt:'שעתיים נסיעה. רואים את השקיעה מעל האגם, והטטרה ברקע.',sleep:'ניידיצה'},
+   {t:'אופניים מסביב לאגם',b:['velo'],txt:'Velo Czorsztyn, הלולאה המלאה או חלק ממנה. הטירה סגורה בימי שני, אז רואים אותה רק מבחוץ.',sleep:'ניידיצה'},
+   {t:'טירה, נהר ואופניים',b:['niedzica','dunajec','bikepien'],txt:'ב-9:00 טירת ניידיצה (10 דקות מ-Kąty), אחר כך רפסודות, ובצהריים אופניים בדרך הפיינינית.',sleep:'ניידיצה'},
+   {t:'צמרות עצים ואגם סלובקי → זקופנה',b:['bachledka','strbske'],txt:'נוסעים לבאכלדקה, ומשם לשטרבסקה פלסו (אפשר לעלות ברכבל Solisko). בערב מגיעים לזקופנה.',sleep:'זקופנה'},
+   {t:'מורסקיה אוקו → קרקוב',b:['morskie','krakow'],txt:'יוצאים ב-6:30 למורסקיה אוקו, בלי צ\'רני סטאב. בצהריים נוסעים לקרקוב (בערך 2.5 שעות).',sleep:'קרקוב',tip:'אם זה ארוך מדי, מחליפים את מורסקיה אוקו בעמק קושצ\'ליסקה.'},
+  ],
+  budget:{km:520,lodge:[1050,1850],park:{PLN:[60,110],EUR:[5,10]},act:{PLN:282,EUR:33}}},
+ {id:'v4',tag:'C',name:'רכבלים ופסגות',sleep:'זקופנה ×4 · קרקוב ×1',
+  intro:'כמה שיותר נוף מלמעלה וכמה שפחות עליות ברגל. בסיס אחד בזקופנה.',
+  pros:['3–4 רכבלים','בסיס לינה אחד','הכי מעט הליכה'],cons:['הכי יקר','בלי מורסקיה אוקו (אפשר להחליף ביום 4)','הכי הרבה נהיגה'],
+  days:[
+   {t:'נחיתה → זקופנה',b:[],txt:'שעתיים נסיעה, ובערב קרופובקי.',sleep:'זקופנה'},
+   {t:'צמרות עצים ו-Lomnický',b:['bachledka','lomnicky'],txt:'בבוקר באכלדקה, עם רכבל ושביל הצמרות. אחר כך רכבל ל-Skalnaté pleso ולפסגה.',sleep:'זקופנה',tip:'שמים את היום הזה על היום הכי בהיר.'},
+   {t:'שטרבסקה פלסו ו-Solisko',b:['strbske'],txt:'רכבל Solisko לתצפית, הליכה סביב האגם, ועוד שעה של הליכה ביער עד פופרדסקה פלסו.',sleep:'זקופנה'},
+   {t:'גובאלובקה, עמק ותרמה',b:['gubalowka','koscieliska','termy'],txt:'בבוקר הפוניקולר, בצהריים עמק קושצ\'ליסקה, ובערב בריכות תרמיות.',sleep:'זקופנה'},
+   {t:'רפסודות → קרקוב',b:['dunajec','krakow'],txt:'בבוקר רפסודות בדונאייץ, ומשם 2.5 שעות נסיעה לקרקוב.',sleep:'קרקוב'},
+  ],
+  budget:{km:640,lodge:[1050,2000],park:{PLN:[20,40],EUR:[10,20]},act:{PLN:239,EUR:137}}},
+];
+const DATES=['א\' 18.10','ב\' 19.10','ג\' 20.10','ד\' 21.10','ה\' 22.10'];
+
+/* ================= budget model ================= */
+const FUEL_PLN=6.73;
+function budgetRows(vid){
+  const bu=V.find(x=>x.id===vid).budget, L=[bu.km*.065,bu.km*.075];
+  const act=toILS(bu.act.PLN,'PLN')+toILS(bu.act.EUR,'EUR');
+  return [
+   ['✈️ טיסה','Wizz Air הלוך-חזור (תיק קטן בלבד)',[134,134],'USD'],
+   ['🚗 השכרת רכב + אישור לסלובקיה','Express (£54 + 199 זל) עד Kaizenrent (£68 + €66.50), ראה <a href="#car">רכב</a>',[toILS(54.06,'GBP')+toILS(199,'PLN'),toILS(68.11,'GBP')+toILS(66.5,'EUR')],'ILS'],
+   ['🛡️ כיסוי מלא להשתתפות עצמית','מומלץ, נקנה אונליין (בערך $37)',[toILS(36.99,'USD'),toILS(36.99,'USD')],'ILS'],
+   ['⛽ דלק',`~${bu.km} ק"מ × 6.5–7.5 ליטר ל-100 ק"מ × ${FUEL_PLN} זל לליטר`,[L[0]*FUEL_PLN,L[1]*FUEL_PLN],'PLN'],
+   ['🅿️ חניות בפולין','Palenica, הרפסודות, זקופנה',bu.park.PLN,'PLN'],
+   ['🅿️ חניות בסלובקיה','ליד הרכבלים',bu.park.EUR,'EUR'],
+   ['🛏️ לינה','פנסיונים ב-200–400 זל ללילה, ולילה ליד השדה',bu.lodge,'PLN'],
+   ['🎟️ אטרקציות',`${bu.act.PLN} זל + €${bu.act.EUR}`,[act,act],'ILS'],
+   ['🍽️ אוכל','5 ימים × 100–150 זל',[500,750],'PLN'],
+  ];
+}
+function budgetTotal(vid){return budgetRows(vid).reduce((s,r)=>[s[0]+toILS(r[2][0],r[3]),s[1]+toILS(r[2][1],r[3])],[0,0])}
+let budV='v1';
+function renderBudget(){
+  const rows=budgetRows(budV), t=budgetTotal(budV);
+  const nat=(a,c)=>c==='GBP'?'£'+(+a).toFixed(2):c==='USD'?'$'+(+a).toFixed(a%1?2:0):c==='EUR'?'€'+Math.round(a):Math.round(a)+' זל';
+  document.getElementById('budTable').innerHTML='<tr><th>סעיף</th><th>פירוט</th><th>במטבע מקומי</th><th>₪</th></tr>'+
+   rows.map(([l,d,[a,b],c])=>`<tr><td>${l}</td><td>${d}</td><td>${c==='ILS'?'—':nat(a,c)+(a!==b?'–'+nat(b,c):'')}</td><td><b>${fmt(toILS(a,c))}${a!==b?'–'+fmt(toILS(b,c)):''}</b></td></tr>`).join('')+
+   `<tr class="total"><td>סה"כ</td><td>לאדם שנוסע לבד</td><td></td><td>${fmt(t[0])}–${fmt(t[1])} ₪</td></tr>`;
+}
+document.getElementById('budTabs').innerHTML=V.map((v,i)=>`<button class="vbtn ${i?'':'on'}" data-v="${v.id}">${v.tag} · ${v.name}</button>`).join('');
+document.getElementById('budTabs').onclick=e=>{const id=e.target.dataset.v;if(!id)return;budV=id;
+  document.querySelectorAll('#budTabs button').forEach(x=>x.classList.toggle('on',x.dataset.v===id));renderBudget()};
+
+/* ================= season table ================= */
+document.getElementById('seasonTable').innerHTML='<tr><th>אטרקציה</th><th>מצב</th></tr>'+
+  [...B].sort((a,b)=>({bad:0,warn:1,ok:2}[a.st]-{bad:0,warn:1,ok:2}[b.st]))
+  .map(b=>`<tr><td>${b.ico} ${b.name}</td><td class="${b.st}">${STXT[b.st]}</td></tr>`).join('');
+
+/* ================= cards + gallery ================= */
+const CATS=[['all','הכל'],['lake','💧 אגמים'],['cable','🚡 רכבלים'],['peak','⛰️ פסגות'],['bike','🚲 אופניים'],['hike','🥾 הליכה'],['river','🛶 נהר'],['castle','🏰 טירות'],['sk','🇸🇰 סלובקיה'],['rain','🌧️ ליום גשם']];
+const fEl=document.getElementById('filters'), cEl=document.getElementById('cards');
+const gIdx={};
+function card(b){
+  gIdx[b.id]=0; const n=b.gal.length;
+  return `<article class="card ${b.st==='bad'?'closed':''}" id="c-${b.id}" data-cats="${b.cats.join(' ')}">
+   <div class="gal" data-id="${b.id}">${b.cover?`<img src="${b.cover}" alt="${b.name}" loading="lazy">`:`<div style="height:100%;display:flex;align-items:center;justify-content:center;font-size:64px">${b.ico}</div>`}
+     <span class="st">${STXT[b.st]}</span>
+     ${n>1?`<button class="nav prev" data-d="-1" aria-label="הקודמת">›</button><button class="nav next" data-d="1" aria-label="הבאה">‹</button><span class="cnt">1 / ${n}</span>`:''}
+     ${n?`<span class="zoom">🔍 אלבום</span>`:''}</div>
+   <div class="cb"><h3>${b.ico} ${b.name}</h3><div class="latin">${b.latin}</div>
+   <p style="margin:.2em 0">${b.desc}</p>
+   <dl class="kv"><dt>⏱ זמן</dt><dd>${b.dur}</dd><dt>💪 קושי</dt><dd>${b.eff}</dd><dt>💰 מחיר</dt><dd>${ann(b.price)}</dd><dt>🔗 משתלב עם</dt><dd>${b.combo}</dd></dl>
+   <div class="alt">🔁 <b>חלופה:</b> ${b.alt}</div>
+   <div class="season">🍂 ${b.season}</div></div></article>`;
+}
+cEl.innerHTML=B.map(card).join('');
+function galStep(id,d){
+  const b=BI[id], n=b.gal.length; if(n<2)return;
+  gIdx[id]=(gIdx[id]+d+n)%n;
+  const g=cEl.querySelector(`.gal[data-id="${id}"]`);
+  g.querySelector('img').src=b.gal[gIdx[id]]; g.querySelector('.cnt').textContent=`${gIdx[id]+1} / ${n}`;
+}
+cEl.addEventListener('click',e=>{
+  const g=e.target.closest('.gal'); if(!g)return;
+  const nav=e.target.closest('button.nav');
+  if(nav){e.stopPropagation(); galStep(g.dataset.id,+nav.dataset.d); return}
+  if(BI[g.dataset.id].gal.length) openLB(g.dataset.id,gIdx[g.dataset.id]);
+});
+let tx=null;
+cEl.addEventListener('touchstart',e=>{if(e.target.closest('.gal'))tx=e.touches[0].clientX},{passive:true});
+cEl.addEventListener('touchend',e=>{const g=e.target.closest('.gal'); if(!g||tx===null)return; const dx=e.changedTouches[0].clientX-tx; tx=null;
+  if(Math.abs(dx)>40) galStep(g.dataset.id,dx>0?1:-1)},{passive:true});
+
+fEl.innerHTML=CATS.map(([k,l],i)=>`<button data-k="${k}" class="${i?'':'on'}">${l}</button>`).join('');
+fEl.onclick=e=>{const k=e.target.dataset.k;if(!k)return;
+  fEl.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.k===k));
+  cEl.querySelectorAll('.card').forEach(c=>c.style.display=(k==='all'||c.dataset.cats.split(' ').includes(k))?'':'none');};
+function goCard(id){
+  fEl.querySelector('[data-k=all]').click(); if(map) map.closePopup();
+  const el=document.getElementById('c-'+id); el.scrollIntoView({behavior:'smooth',block:'center'});
+  el.classList.add('flash'); setTimeout(()=>el.classList.remove('flash'),1800);
+}
+window.goCard=goCard;
+
+/* ================= lightbox ================= */
+const lb=document.getElementById('lb'), lbImg=document.getElementById('lbImg');
+let lbId=null, lbI=0;
+function openLB(id,i){lbId=id; lbI=i||0; lb.classList.add('open'); document.body.style.overflow='hidden'; showLB();}
+function closeLB(){lb.classList.remove('open'); document.body.style.overflow=''; if(lbId&&BI[lbId].gal.length>1){gIdx[lbId]=lbI; galStep(lbId,0)} lbId=null}
+function showLB(){
+  const b=BI[lbId], n=b.gal.length;
+  lbImg.src=b.gal[lbI];
+  document.getElementById('lbCap').innerHTML=`${b.ico} ${b.name} · ${lbI+1} / ${n}<small>${b.latin} · Wikimedia Commons</small>`;
+  document.getElementById('lbThumbs').innerHTML=b.gal.map((u,i)=>`<img src="${u}" data-i="${i}" class="${i===lbI?'on':''}" loading="lazy">`).join('');
+  [b.gal[(lbI+1)%n],b.gal[(lbI-1+n)%n]].forEach(u=>{const im=new Image(); im.src=u});
+}
+function stepLB(d){const n=BI[lbId].gal.length; lbI=(lbI+d+n)%n; showLB()}
+lb.querySelector('.x').onclick=closeLB;
+lb.querySelector('.ln').onclick=()=>stepLB(1);
+lb.querySelector('.lp').onclick=()=>stepLB(-1);
+lb.onclick=e=>{if(e.target===lb)closeLB()};
+document.getElementById('lbThumbs').onclick=e=>{const i=e.target.dataset.i; if(i!==undefined){lbI=+i; showLB()}};
+document.addEventListener('keydown',e=>{if(!lbId)return; if(e.key==='Escape')closeLB(); if(e.key==='ArrowLeft')stepLB(1); if(e.key==='ArrowRight')stepLB(-1)});
+let lx=null;
+lb.addEventListener('touchstart',e=>lx=e.touches[0].clientX,{passive:true});
+lb.addEventListener('touchend',e=>{if(lx===null)return; const dx=e.changedTouches[0].clientX-lx; lx=null; if(Math.abs(dx)>40) stepLB(dx>0?1:-1)},{passive:true});
+window.openLB=openLB;
+
+/* ================= variants ================= */
+const tabs=document.getElementById('vtabs'), body=document.getElementById('vbody');
+let curV='v1';
+function chip(id){const b=BI[id];return `<span class="chip" onclick="goCard('${id}')">${b.ico} ${b.name}</span>`}
+function renderVariant(v){
+  const r=(ROUTES&&ROUTES[v.id])||[]; const [ba,bb]=budgetTotal(v.id);
+  body.innerHTML=`<div class="vhead"><div class="box"><h3>מסלול ${v.tag}: ${v.name}</h3><p style="margin:.2em 0">${v.intro}</p>
+    <div class="proscons"><div><b class="ok">בעד</b><ul>${v.pros.map(x=>`<li>${x}</li>`).join('')}</ul></div><div><b class="warn">נגד</b><ul>${v.cons.map(x=>`<li>${x}</li>`).join('')}</ul></div></div></div>
+    <div class="box"><div class="facts"><span class="pill">🚗 ~${v.budget.km} ק"מ</span><span class="pill">💰 ${fmt(ba)}–${fmt(bb)} ₪ לאדם לבד</span></div>
+    <p style="margin:.6em 0 0;font-size:.93rem">🛏️ ${v.sleep}</p><p style="margin:.4em 0 0"><a href="#mapsec" onclick="setVariant('${v.id}')">← להציג על המפה</a></p></div></div>`+
+  v.days.map((d,i)=>`<div class="day"><div class="dl" style="background:${DAYC[i]}"><b>יום ${i+1}</b><span>${DATES[i]}</span>${r[i]?`<span>🚗 ${r[i].km} ק"מ · ~${Math.round(r[i].min/60*1.15*10)/10} ש'</span>`:''}</div>
+    <div class="db"><h3>${d.t}</h3><p>${d.txt}</p><div class="meta">${d.b.map(chip).join('')}<span class="pill">🛏️ ${d.sleep}</span></div>${d.tip?`<div class="tip">💡 ${d.tip}</div>`:''}</div></div>`).join('')+
+  `<div class="day"><div class="dl" style="background:#555"><b>יום 6</b><span>ו' 23.10</span></div><div class="db"><h3>חזרה</h3><p>יוצאים לשדה ב-03:00 (20–30 דקות נסיעה) ומחזירים את הרכב ב-03:30. הטיסה W62097 ב-05:40.</p></div></div>`;
+}
+tabs.innerHTML=V.map((v,i)=>`<button class="vbtn ${i?'':'on'}" data-v="${v.id}">${v.tag} · ${v.name}</button>`).join('');
+tabs.onclick=e=>{const id=e.target.dataset.v; if(id) setVariant(id)};
+
+/* ================= map ================= */
+let map, routeLayer, zoomMode='area';
+const AREA=[[49.10,19.76],[49.47,20.52]];
+const hidden=new Set();
+function initMap(){
+  if(typeof L==='undefined'){document.getElementById('map').innerHTML='<p style="padding:20px">המפה לא נטענה. צריך חיבור לאינטרנט.</p>';return}
+  map=L.map('map',{scrollWheelZoom:false,zoomSnap:0.25});
+  const topo=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:18,attribution:'Tiles © Esri — Esri, HERE, Garmin, © OpenStreetMap'}).addTo(map);
+  const sat=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:18,attribution:'Tiles © Esri'});
+  const osm=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'© OpenStreetMap'});
+  L.control.layers({'טופוגרפית':topo,'לוויין':sat,'רחובות':osm},null,{position:'topright'}).addTo(map);
+  map.fitBounds(AREA);
+  map.on('click',()=>map.scrollWheelZoom.enable());
+  const farCls=()=>document.getElementById('map').classList.toggle('far',map.getZoom()<9.5);
+  map.on('zoomend',farCls); farCls();
+  B.forEach(b=>{
+    const ic=L.divIcon({className:'',html:`<div class="pin ${b.st==='bad'?'closed':''}">${b.ico}</div>`,iconSize:[30,30],iconAnchor:[15,15]});
+    L.marker(b.ll,{icon:ic,zIndexOffset:500,title:b.name}).addTo(map).bindPopup(
+      `${b.cover?`<img src="${b.cover}" onclick="openLB('${b.id}',0)">`:''}<b>${b.name}</b><br><span style="color:#666">${b.dur} · ${STXT[b.st]}</span><br>${ann(b.price)}<br><a href="#" onclick="goCard('${b.id}');return false">← לכרטיס המלא</a>${b.gal.length>1?` · <a href="#" onclick="openLB('${b.id}',0);return false">📷 ${b.gal.length} תמונות</a>`:''}`,{minWidth:240});
+  });
+  map.on('popupopen',e=>e.popup.getElement().querySelectorAll('.ils').forEach(s=>{const c=s.dataset.c,a=+s.dataset.a,b=s.dataset.b?+s.dataset.b:null;
+    s.textContent=` (≈${fmt(toILS(a,c))}${b?`–${fmt(toILS(b,c))}`:''} ₪)`}));
+  [['🛏️ זקופנה',[49.2992,19.9496]],['🛏️ שצ\'בניצה',[49.4270,20.4870]],['🛏️ ניידיצה',[49.4300,20.3050]],['✈️ שדה התעופה',[50.0777,19.7848]]].forEach(([n,ll])=>
+    L.marker(ll,{icon:L.divIcon({className:'',html:`<div class="daytag base">${n}</div>`,iconSize:[0,0]}),zIndexOffset:300}).addTo(map));
+  routeLayer=L.layerGroup().addTo(map);
+  window.addEventListener('load',()=>{map.invalidateSize(); fitView()});
+}
+function fitView(){ if(!map)return;
+  if(zoomMode==='area') map.fitBounds(AREA,{padding:[10,10]});
+  else {const all=((ROUTES&&ROUTES[curV])||[]).flatMap(d=>d.g); if(all.length) map.fitBounds(all,{padding:[30,30]});}
+}
+document.getElementById('zArea').onclick=()=>{zoomMode='area';fitView()};
+document.getElementById('zAll').onclick=()=>{zoomMode='all';fitView()};
+function drawRoute(){
+  if(!map)return; routeLayer.clearLayers();
+  const v=V.find(x=>x.id===curV), r=(ROUTES&&ROUTES[curV])||[];
+  r.forEach((d,i)=>{
+    if(hidden.has(i))return;
+    L.polyline(d.g,{color:'#fff',weight:9,opacity:.9}).addTo(routeLayer);
+    L.polyline(d.g,{color:DAYHEX[i],weight:5,opacity:.95}).addTo(routeLayer);
+    const pos = i===0||i===4 ? 0.75 : 0.45; // airport legs: label near the mountains, not near Kraków
+    const m=d.g[Math.floor(d.g.length*pos)];
+    L.marker(m,{icon:L.divIcon({className:'',html:`<div class="daytag" style="border-color:${DAYHEX[i]};color:${DAYHEX[i]}">יום ${i+1}</div>`,iconSize:[0,0]}),zIndexOffset:1000}).addTo(routeLayer);
+  });
+  document.getElementById('legend').innerHTML=v.days.map((d,i)=>`<button data-i="${i}" class="${hidden.has(i)?'dim':''}"><i style="background:${DAYHEX[i]}"></i>יום ${i+1}: ${d.t}${r[i]?` · ${r[i].km} ק"מ`:''}</button>`).join('');
+}
+document.getElementById('legend').onclick=e=>{const b=e.target.closest('button'); if(!b)return; const i=+b.dataset.i; hidden.has(i)?hidden.delete(i):hidden.add(i); drawRoute();};
+const mv=document.getElementById('mapVariants');
+mv.innerHTML=V.map((v,i)=>`<button class="vbtn ${i?'':'on'}" data-v="${v.id}">${v.tag} · ${v.name}</button>`).join('');
+mv.onclick=e=>{const id=e.target.dataset.v; if(id) setVariant(id)};
+function setVariant(id){
+  curV=id; hidden.clear();
+  [tabs,mv].forEach(c=>c.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.v===id)));
+  renderVariant(V.find(v=>v.id===id)); drawRoute(); fitView();
+}
+window.setVariant=setVariant;
+
+/* ================= builder ================= */
+const bg=document.getElementById('bgrid');
+const opts='<option value="">—</option>'+B.filter(b=>b.st!=='bad').map(b=>`<option value="${b.id}">${b.ico} ${b.name}</option>`).join('');
+bg.innerHTML=[1,2,3,4].map(i=>`<div class="bday"><b style="color:${DAYHEX[i]}">יום ${i+1} · ${DATES[i]}</b><select data-d="${i}" data-s="0">${opts}</select><select data-d="${i}" data-s="1">${opts}</select><div class="hrs" id="h${i}"></div></div>`).join('');
+const SK=new Set(['lomnicky','strbske','bachledka']);
+function calc(){
+  const sel=[1,2,3,4].map(i=>[...bg.querySelectorAll(`select[data-d="${i}"]`)].map(s=>s.value).filter(Boolean));
+  const W=[]; let ils=0; const seen={};
+  sel.forEach((ids,k)=>{const i=k+1; let h=0;
+    ids.forEach(id=>{const b=BI[id]; if(!b.eve)h+=b.hrs; ils+=costILS(b.cost); seen[id]=(seen[id]||0)+1;
+      if(id==='niedzica'&&i===1) W.push(['e',`יום 2 (שני): טירת ניידיצה סגורה בימי שני.`]);
+    });
+    document.getElementById('h'+i).textContent=ids.length?`⏱ ~${h} שעות פעילות`:'';
+    if(h>8) W.push(['w',`יום ${i+1}: ${h} שעות של פעילות, וזה הרבה כשהחושך יורד ב-17:20.`]);
+    if(ids.some(x=>SK.has(x))&&ids.some(x=>['dunajec','velo','bikepien','sokolica','niedzica'].includes(x))) W.push(['w',`יום ${i+1}: סלובקיה ופייניני באותו יום זה הרבה נהיגה.`]);
+    if(i===4&&ids.some(x=>SK.has(x))) W.push(['e',`יום 5: סלובקיה ביום האחרון, ואחריה 3 שעות נסיעה לקרקוב לפני טיסה ב-05:40. לא מומלץ.`]);
+  });
+  Object.entries(seen).forEach(([id,n])=>{if(n>1)W.push(['w',`${BI[id].name} נבחר ${n} פעמים.`])});
+  const has=x=>x in seen;
+  if(Object.keys(seen).length){
+    if(!['lomnicky','strbske','morskie'].some(has)) W.push(['w','אין אף אגם הרים או פסגה בטטרה. כדאי להוסיף את מורסקיה אוקו או Lomnický.']);
+    if(!W.length) W.push(['g','✅ השילוב נראה טוב.']);
+  }
+  document.getElementById('btotal').innerHTML=Object.keys(seen).length?`💰 אטרקציות: <b>≈ ${fmt(ils)} ₪</b> לאדם. בלי לינה, רכב, דלק ואוכל.`:'';
+  document.getElementById('bwarn').innerHTML=W.map(([c,t])=>`<div class="${c}">${c==='e'?'❌':c==='w'?'⚠️':''} ${t}</div>`).join('');
+}
+bg.onchange=calc;
+document.getElementById('bclear').onclick=()=>{bg.querySelectorAll('select').forEach(s=>s.value='');calc()};
+document.getElementById('bloadA').onclick=()=>{const v=V[0];[1,2,3,4].forEach(i=>{const ss=bg.querySelectorAll(`select[data-d="${i}"]`);const ids=v.days[i].b.filter(x=>x!=='bachledka');ss[0].value=ids[0]||'';ss[1].value=ids[1]||''});calc()};
+
+/* ================= theme ================= */
+const root=document.documentElement;
+try{const t=localStorage.getItem('pl-theme'); if(t) root.dataset.theme=t;}catch(e){}
+document.getElementById('themeBtn').onclick=()=>{root.dataset.theme=root.dataset.theme==='light'?'dark':'light';try{localStorage.setItem('pl-theme',root.dataset.theme)}catch(e){}};
+
+
+/* ================= weather ================= */
+const CLIM = {"zak": {"name": "זקופנה (840 מ')", "tmax": 12.1, "tmin": 4.1, "tmax_p10": 6.2, "tmax_p90": 18.9, "rain": 28, "snow": 4, "sunny": 58, "frost": 8, "sunh": 6.5}, "lom": {"name": "פסגת Lomnický (2,634 מ')", "tmax": 0.5, "tmin": -6.2, "tmax_p10": -5.3, "tmax_p90": 6.1, "rain": 30, "snow": 8, "sunny": 61, "frost": 98, "sunh": 6.5}, "szcz": {"name": "שצ'בניצה / פייניני", "tmax": 13.5, "tmin": 4.6, "tmax_p10": 8.4, "tmax_p90": 19.4, "rain": 28, "snow": 1, "sunny": 62, "frost": 11, "sunh": 6.5}, "krk": {"name": "קרקוב", "tmax": 14.2, "tmin": 5.7, "tmax_p10": 9.5, "tmax_p90": 20.1, "rain": 30, "snow": 0, "sunny": 66, "frost": 4, "sunh": 6.3}};
+const WXLOC = {zak:{n:'זקופנה',la:49.2992,lo:19.9496}, lom:{n:'פסגת Lomnický',la:49.1953,lo:20.2132,el:2634}, szcz:{n:'פייניני',la:49.4270,lo:20.4870}, krk:{n:'קרקוב',la:50.0617,lo:19.9373}};
+const TRIP=['2026-10-18','2026-10-19','2026-10-20','2026-10-21','2026-10-22','2026-10-23'];
+const PLAN={'2026-10-18':['zak','נחיתה → זקופנה'],'2026-10-19':['lom','סלובקיה: Lomnický'],'2026-10-20':['zak','מורסקיה אוקו'],'2026-10-21':['szcz','פייניני: רפסודות ואופניים'],'2026-10-22':['krk','טירה → קרקוב'],'2026-10-23':['krk','טיסה 05:40']};
+const DOW=['א\'','ב\'','ג\'','ד\'','ה\'','ו\'','ש\''];
+const WMO=c=>c==null?['❔','']:c===0?['☀️','בהיר']:c<=2?['🌤️','מעונן חלקית']:c===3?['☁️','מעונן']:c<=48?['🌫️','ערפל']:c<=57?['🌦️','טפטוף']:c<=67?['🌧️','גשם']:c<=77?['🌨️','שלג']:c<=82?['🌦️','ממטרים']:c<=86?['🌨️','ממטרי שלג']:['⛈️','סופות רעמים'];
+const wxCache={}; let wxMode='plan';
+const med=a=>{const s=[...a].sort((x,y)=>x-y);return s[Math.floor(s.length/2)]}, qt=(a,p)=>{const s=[...a].sort((x,y)=>x-y);return s[Math.min(s.length-1,Math.floor(s.length*p))]};
+const daysAhead=t=>Math.round((new Date(t+'T12:00:00')-new Date())/864e5);
+async function wxLoad(k){
+  if(wxCache[k]) return wxCache[k];
+  const L=WXLOC[k], el=L.el?`&elevation=${L.el}`:'', res={};
+  try{
+    const f=await (await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${L.la}&longitude=${L.lo}${el}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum,snowfall_sum,wind_speed_10m_max&timezone=Europe%2FWarsaw&forecast_days=16`)).json();
+    f.daily.time.forEach((t,i)=>{const D=f.daily; if(TRIP.includes(t)&&D.temperature_2m_max[i]!=null)
+      res[t]={src:daysAhead(t)<=7?'det':'mid',code:D.weather_code[i],tmax:D.temperature_2m_max[i],tmin:D.temperature_2m_min[i],pp:D.precipitation_probability_max[i],pr:D.precipitation_sum[i],sn:D.snowfall_sum[i],wind:D.wind_speed_10m_max[i]}});
+  }catch(e){}
+  const miss=TRIP.filter(t=>!res[t]);
+  if(miss.length && daysAhead(miss[0])<=34){
+    try{
+      const e=await (await fetch(`https://ensemble-api.open-meteo.com/v1/ensemble?latitude=${L.la}&longitude=${L.lo}${el}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&models=gfs05&timezone=Europe%2FWarsaw&start_date=${miss[0]}&end_date=${miss[miss.length-1]}`)).json();
+      e.daily.time.forEach((t,i)=>{if(!miss.includes(t))return; const m=v=>Object.keys(e.daily).filter(x=>x.startsWith(v)).map(x=>e.daily[x][i]).filter(x=>x!=null);
+        const tx=m('temperature_2m_max'),tn=m('temperature_2m_min'),pr=m('precipitation_sum'); if(!tx.length)return;
+        res[t]={src:'ens',tmax:med(tx),tmin:med(tn),lo:qt(tx,.1),hi:qt(tx,.9),pp:Math.round(100*pr.filter(x=>x>=1).length/pr.length),pr:med(pr)}});
+    }catch(e){}
+  }
+  return wxCache[k]=res;
+}
+function wxCard(t,k,d,label){
+  const dt=new Date(t+'T12:00:00'), C=CLIM[k]||{}, col={det:'var(--ok)',mid:'var(--warn)',ens:'var(--mute)'};
+  let ico,txt;
+  if(!d){ico='📊';txt='ממוצע רב-שנתי'}
+  else if(d.src==='ens'){ico=d.pp>=60?'🌧️':d.pp>=35?'🌦️':'⛅';txt=`סיכוי לגשם ${d.pp}%`}
+  else{[ico,txt]=WMO(d.code)}
+  const tmax=d?d.tmax:C.tmax, tmin=d?d.tmin:C.tmin;
+  return `<div class="wxd" style="border-top-color:${d?col[d.src]:'var(--line)'}">
+    <div class="wdate">${DOW[dt.getDay()]} ${dt.getDate()}.10</div><div class="wplan">${label||''}</div><div class="wloc">📍 ${WXLOC[k].n}</div>
+    <div class="wico">${ico}</div><div class="wtxt">${txt}</div>
+    <div class="wtemp"><b>${Math.round(tmax)}°</b> / ${Math.round(tmin)}°</div>
+    ${d&&d.src==='ens'?`<div class="wsm">טווח אפשרי: ${Math.round(d.lo)}° עד ${Math.round(d.hi)}°</div>`:''}
+    ${d&&d.src!=='ens'?`<div class="wsm">☔ ${d.pp??'–'}% · ${(d.pr??0).toFixed(1)} מ"מ${d.sn>0?` · ❄️ ${d.sn.toFixed(1)} ס"מ`:''}${d.wind>=40?` · 💨 ${Math.round(d.wind)} קמ"ש`:''}</div>`:''}
+    ${C.tmax!=null?`<div class="wclim">ממוצע לתאריך: ${Math.round(C.tmax)}° / ${Math.round(C.tmin)}°</div>`:''}
+  </div>`;
+}
+async function wxRender(){
+  const box=document.getElementById('wxDays');
+  const keys=wxMode==='plan'?[...new Set(TRIP.map(t=>PLAN[t][0]))]:[wxMode];
+  const data={}; await Promise.all(keys.map(async k=>data[k]=await wxLoad(k)));
+  box.innerHTML=TRIP.map(t=>{const k=wxMode==='plan'?PLAN[t][0]:wxMode; return wxCard(t,k,data[k][t],PLAN[t][1])}).join('');
+  const all=TRIP.map(t=>data[wxMode==='plan'?PLAN[t][0]:wxMode][t]), c=s=>all.filter(d=>d&&d.src===s).length;
+  const det=c('det'),mid=c('mid'),ens=c('ens'),none=all.filter(d=>!d).length;
+  const ready=new Date('2026-10-16T12:00:00'), dleft=Math.ceil((ready-new Date())/864e5);
+  document.getElementById('wxStatus').innerHTML=`<b>מצב התחזית (${new Date().toLocaleDateString('he-IL')}):</b> ${det} ימים בתחזית מדויקת · ${mid} בתחזית בינונית · ${ens} בטווח ארוך${none?` · ${none} לפי ממוצע רב-שנתי`:''}.`+
+    (dleft>0?` התחזית המדויקת לכל ימי הטיול תהיה זמינה מ-<b>16.10</b> (בעוד ${dleft} ימים). עד אז, כדאי להתייחס לטווח הארוך רק ככיוון כללי.`:' כל ימי הטיול כבר בתחזית המדויקת.');
+}
+document.getElementById('wxTabs').innerHTML=[['plan','🗓️ לפי מסלול A'],...Object.entries(WXLOC).map(([k,v])=>[k,'📍 '+v.n])].map(([k,l],i)=>`<button class="vbtn ${i?'':'on'}" data-k="${k}">${l}</button>`).join('');
+document.getElementById('wxTabs').onclick=e=>{const k=e.target.dataset.k; if(!k)return; wxMode=k;
+  document.querySelectorAll('#wxTabs button').forEach(b=>b.classList.toggle('on',b.dataset.k===k)); wxRender()};
+document.getElementById('climTable').innerHTML='<tr><th>מקום</th><th>מקס׳ / מינ׳</th><th>יום קר / חם</th><th>ימים גשומים</th><th>ימים שמשיים</th><th>לילות עם כפור</th></tr>'+
+  Object.values(CLIM).map(c=>`<tr><td>${c.name}</td><td><b>${c.tmax}°</b> / ${c.tmin}°</td><td>${c.tmax_p10}° / ${c.tmax_p90}°</td><td>${c.rain}%</td><td>${c.sunny}%</td><td>${c.frost}%</td></tr>`).join('');
+document.getElementById('wxLinks').innerHTML='🔗 <a href="https://www.yr.no/en/forecast/daily-table/2-3080866/Poland/Lesser%20Poland/Tatra%20County/Zakopane" target="_blank">yr.no – זקופנה</a> · <a href="https://www.windy.com/49.195/20.213?49.195,20.213,11" target="_blank">Windy – Lomnický</a> · <a href="https://www.webcamera.pl/" target="_blank">מצלמות רשת בטטרה (webcamera.pl)</a>';
+wxRender();
+
+initMap(); setVariant('v1'); refreshFX(); loadFX();
+</script>
+</body>
+</html>

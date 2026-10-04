@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>שלושה יעדים לאוקטובר</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f3ee;--card:#fff;--ink:#1d2329;--ink2:#4a535c;--mute:#7b848c;--line:#e3dfd6;
+  --acc:#2f6f5e;--acc2:#e7f1ed;--warn:#b7791f;--warnbg:#fbf3e3;--bad:#b4443a;--badbg:#f9e9e7;--ok:#2f7d4f;
+  --pl:#c0392b;--ro:#1f5fa8;--oh:#0f8a8a;--shadow:0 1px 2px rgba(0,0,0,.05),0 6px 20px rgba(0,0,0,.06);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#12161a;--card:#1b2127;--ink:#e8ecef;--ink2:#b5bec6;--mute:#87919a;--line:#2b333b;
+  --acc:#62b59c;--acc2:#1d2c28;--warn:#e0a84a;--warnbg:#2c2618;--bad:#e2786d;--badbg:#2e1d1b;--ok:#6fcf97;
+  --pl:#ef7a6c;--ro:#6aa6ee;--oh:#4fd1c5;--shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.35);}}
+:root[data-theme="dark"]{
+  --bg:#12161a;--card:#1b2127;--ink:#e8ecef;--ink2:#b5bec6;--mute:#87919a;--line:#2b333b;
+  --acc:#62b59c;--acc2:#1d2c28;--warn:#e0a84a;--warnbg:#2c2618;--bad:#e2786d;--badbg:#2e1d1b;--ok:#6fcf97;
+  --pl:#ef7a6c;--ro:#6aa6ee;--oh:#4fd1c5;--shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.35);}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Heebo,system-ui,sans-serif;line-height:1.55;font-size:16px}
+a{color:var(--acc)}
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px}
+header.hero{position:relative;color:#fff;padding:56px 0 40px;overflow:hidden;background:#1c2a33}
+.hero .bgs{position:absolute;inset:0;display:grid;grid-template-columns:repeat(3,1fr)}
+.hero .bgs div{background-size:cover;background-position:center}
+.hero:after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(8,12,16,.92),rgba(8,12,16,.45))}
+.hero .wrap{position:relative;z-index:1}
+.hero h1{font-size:clamp(1.8rem,4.5vw,2.8rem);margin:.2em 0 .25em;font-weight:800;line-height:1.15}
+.hero p{margin:0;max-width:720px;font-size:1.08rem;color:#e5ecef}
+.pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.pill{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(255,255,255,.3);background:rgba(0,0,0,.35);padding:4px 12px;border-radius:999px;font-size:.9rem}
+nav.top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav.top .wrap{display:flex;gap:4px;align-items:center;overflow-x:auto;padding-top:8px;padding-bottom:8px;white-space:nowrap}
+nav.top a{text-decoration:none;color:var(--ink2);padding:6px 10px;border-radius:8px;font-size:.93rem}
+nav.top a:hover{background:var(--acc2);color:var(--acc)}
+#themeBtn{margin-inline-start:auto;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:5px 10px;cursor:pointer}
+section{padding:34px 0 8px}
+h2{font-size:1.55rem;margin:0 0 6px;font-weight:800}
+.sub{color:var(--ink2);margin:0 0 18px}
+.box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow)}
+/* verdict */
+.verdict{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.vcard{position:relative;border-radius:14px;padding:16px;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);border-top:5px solid var(--c)}
+.vcard .tag{font-size:.8rem;font-weight:700;color:var(--c);letter-spacing:.02em}
+.vcard h3{margin:.15em 0 .3em;font-size:1.25rem}
+.vcard p{margin:0;color:var(--ink2);font-size:.95rem}
+.vcard .go{display:inline-block;margin-top:10px;font-weight:600;text-decoration:none}
+/* picker */
+.picker{display:grid;grid-template-columns:1.1fr 1fr;gap:16px}
+.prio{display:grid;gap:10px}
+.prio .row{display:grid;grid-template-columns:130px 1fr 34px;align-items:center;gap:10px}
+.prio label{font-weight:500}
+.prio input[type=range]{width:100%;accent-color:var(--acc)}
+.prio output{color:var(--mute);font-size:.85rem;text-align:center}
+.presets{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:6px 12px;border-radius:999px;cursor:pointer;font:inherit;font-size:.9rem}
+.btn:hover,.btn.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.rank{display:grid;gap:10px}
+.rk{display:grid;grid-template-columns:34px 1fr auto;gap:10px;align-items:center;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg)}
+.rk .n{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:800;color:#fff;background:var(--c)}
+.rk .bar{height:8px;border-radius:5px;background:var(--line);overflow:hidden;margin-top:4px}
+.rk .bar i{display:block;height:100%;background:var(--c);transition:width .35s}
+.rk b{font-size:1.05rem}
+.rk .sc{font-weight:800;color:var(--c);font-size:1.1rem}
+.rk.first{border-color:var(--c);box-shadow:0 0 0 2px color-mix(in srgb,var(--c) 30%,transparent)}
+/* destination cards */
+.dests{display:grid;gap:22px}
+.dest{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:var(--shadow)}
+.dest .media{position:relative;min-height:320px;background:#223}
+.dest .media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s}
+.dest .media img.on{opacity:1}
+.dest .media .cap{position:absolute;inset-inline:0;bottom:0;padding:40px 14px 12px;color:#fff;background:linear-gradient(to top,rgba(0,0,0,.75),transparent);font-size:.9rem}
+.dest .media .dots{position:absolute;top:10px;inset-inline-start:10px;display:flex;gap:5px}
+.dest .media .dots button{width:9px;height:9px;border-radius:50%;border:0;padding:0;background:rgba(255,255,255,.5);cursor:pointer}
+.dest .media .dots button.on{background:#fff}
+.dest .media .nav{position:absolute;top:50%;transform:translateY(-50%);width:34px;height:34px;border-radius:50%;border:0;background:rgba(0,0,0,.45);color:#fff;font-size:20px;cursor:pointer}
+.dest .media .prev{right:8px}.dest .media .next{left:8px}
+.dest .body{padding:18px 20px}
+.dhead{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 14px}
+.dhead h3{margin:0;font-size:1.6rem;font-weight:800}
+.dhead .flag{font-size:1.5rem}
+.dhead .one{color:var(--ink2)}
+.price{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0}
+.price .p{flex:1 1 150px;border-radius:12px;padding:10px 12px;background:var(--bg);border:1px solid var(--line)}
+.price .p small{display:block;color:var(--mute);font-size:.8rem}
+.price .p b{font-size:1.25rem}
+.price .p.main{background:color-mix(in srgb,var(--c) 12%,var(--card));border-color:color-mix(in srgb,var(--c) 45%,var(--line))}
+.price .p.main b{color:var(--c);font-size:1.45rem}
+.flight{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;font-size:.93rem;color:var(--ink2);margin-bottom:10px}
+.badge{display:inline-flex;gap:4px;align-items:center;padding:2px 9px;border-radius:999px;font-size:.8rem;font-weight:600}
+.badge.ok{background:color-mix(in srgb,var(--ok) 15%,transparent);color:var(--ok)}
+.badge.warn{background:var(--warnbg);color:var(--warn)}
+.scores{display:grid;grid-template-columns:repeat(4,1fr);gap:6px 14px;margin:6px 0 12px}
+.score{font-size:.85rem;color:var(--ink2)}
+.score .st{display:flex;gap:3px;margin-top:2px}
+.score .st i{flex:1;height:6px;border-radius:3px;background:var(--line)}
+.score .st i.f{background:var(--c)}
+.vars{display:grid;gap:8px;margin:8px 0 12px}
+.var{display:grid;grid-template-columns:auto 1fr auto;gap:4px 12px;align-items:center;padding:9px 12px;border:1px solid var(--line);border-radius:12px}
+.var .t{font-weight:800;color:var(--c);font-size:1.05rem}
+.var .nm{font-weight:600}
+.var .nm small{display:block;font-weight:400;color:var(--ink2);font-size:.86rem}
+.var .bd{text-align:left;font-weight:700;white-space:nowrap}
+.var .bd small{display:block;font-weight:400;color:var(--mute);font-size:.8rem}
+.var.rec{background:color-mix(in srgb,var(--c) 8%,transparent);border-color:color-mix(in srgb,var(--c) 40%,var(--line))}
+.pc{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pc h4{margin:0 0 4px;font-size:.95rem}
+.pc ul{margin:0;padding-inline-start:18px;font-size:.93rem;color:var(--ink2)}
+.pc li{margin-bottom:3px}
+.full{display:inline-flex;align-items:center;gap:6px;margin-top:14px;padding:9px 16px;border-radius:10px;background:var(--c);color:#fff;text-decoration:none;font-weight:700}
+/* days */
+.daysTabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.days{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.day{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;box-shadow:var(--shadow);border-top:4px solid var(--c)}
+.day .d{font-size:.8rem;color:var(--mute);font-weight:600}
+.day .h{font-weight:700;margin:2px 0 6px;line-height:1.3}
+.day .ic{font-size:.85rem;color:var(--ink2)}
+/* table */
+.tablewrap{overflow-x:auto;border-radius:14px;border:1px solid var(--line);background:var(--card)}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:.94rem}
+th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:right;vertical-align:top}
+th{background:var(--bg);font-weight:700;position:sticky;top:0}
+td.k{font-weight:600;color:var(--ink2);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td .w{color:var(--ok);font-weight:700}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.two>*,.picker>*,.dest>*{min-width:0}
+ul.tight{margin:0;padding-inline-start:18px}
+ul.tight li{margin-bottom:5px}
+footer{padding:30px 0;color:var(--mute);font-size:.85rem}
+@media (max-width:900px){
+  .verdict{grid-template-columns:1fr}
+  .picker,.two{grid-template-columns:1fr}
+  .dest{grid-template-columns:1fr}
+  .dest .media{min-height:230px}
+  .days{grid-template-columns:1fr 1fr}
+}
+@media (max-width:560px){
+  .scores{grid-template-columns:1fr 1fr}
+  .pc{grid-template-columns:1fr}
+  .days{grid-template-columns:1fr}
+  .prio .row{grid-template-columns:100px 1fr 30px}
+  .var{grid-template-columns:auto 1fr}
+  .var .bd{grid-column:2;text-align:right}
+  .hero .bgs{grid-template-columns:1fr}
+  .hero .bgs div:not(:first-child){display:none}
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="bgs" id="heroBgs"></div>
+  <div class="wrap">
+    <div class="pills">
+      <span class="pill">🗓️ 18–23 באוקטובר 2026</span>
+      <span class="pill">🧍 נוסע אחד</span>
+      <span class="pill">🚗 עם רכב</span>
+      <span class="pill">🕯️ נוחתים בשישי לפני 10:00</span>
+    </div>
+    <h1>שלושה יעדים, החלטה אחת</h1>
+    <p>הרים, אגמים, רכבלים ואופניים. כל השלושה עומדים בתנאים: מים ואופניים בכל מסלול, וחזרה לפני שבת. כאן רואים אותם זה מול זה.</p>
+  </div>
+</header>
+
+<nav class="top"><div class="wrap">
+  <a href="#verdict">השורה התחתונה</a><a href="#picker">מה חשוב לך</a><a href="#dests">היעדים</a><a href="#days">יום אחר יום</a><a href="#table">טבלה</a><a href="#notes">לפני שמחליטים</a>
+  <button id="themeBtn" aria-label="מצב תצוגה">☀️ / 🌙</button>
+</div></nav>
+
+<main class="wrap">
+
+<section id="verdict">
+  <h2>השורה התחתונה</h2>
+  <p class="sub">כל יעד מנצח בדבר אחר. אם צריך לבחור רק לפי משפט אחד:</p>
+  <div class="verdict">
+    <div class="vcard" style="--c:var(--pl)">
+      <div class="tag">💰 הכי משתלם ובטוח</div>
+      <h3>🇵🇱 דרום פולין</h3>
+      <p>הטיסה הזולה ($134), התקציב הנמוך, ופסגה של 2,634 מ' ברכבל בסלובקיה. רפסודות בקניון ואופניים לאורך הנהר.</p>
+      <a class="go" href="#d-pl" style="color:var(--pl)">לפרטים ←</a>
+    </div>
+    <div class="vcard" style="--c:var(--ro)">
+      <div class="tag">🏔️ הכי הרבה הרים ורכבלים</div>
+      <h3>🇷🇴 טרנסילבניה</h3>
+      <p>הכביש ההררי המפורסם, אגם בגובה 2,034 מ', שני רכבלים גדולים ואגם בתוך לוע הר געש. הכי הרבה נהיגה.</p>
+      <a class="go" href="#d-ro" style="color:var(--ro)">לפרטים ←</a>
+    </div>
+    <div class="vcard" style="--c:var(--oh)">
+      <div class="tag">🚲 הכי הרבה מים ורכיבה</div>
+      <h3>🇲🇰🇦🇱 אגם אוחריד</h3>
+      <p>אגם ענק, שני חופים בשתי מדינות, רכיבה לאורך המים כל יום ומעיינות עם סירת משוטים. הטיסה הכי יקרה.</p>
+      <a class="go" href="#d-oh" style="color:var(--oh)">לפרטים ←</a>
+    </div>
+  </div>
+</section>
+
+<section id="picker">
+  <h2>🎚️ מה חשוב לך?</h2>
+  <p class="sub">מזיזים את הסליידרים, והדירוג מתעדכן. הציונים מבוססים על המסלול המומלץ בכל יעד.</p>
+  <div class="picker">
+    <div class="box">
+      <div class="presets" id="presets"></div>
+      <div class="prio" id="prio"></div>
+    </div>
+    <div class="box">
+      <div class="rank" id="rank"></div>
+      <p style="margin:12px 0 0;color:var(--ink2);font-size:.93rem" id="rankWhy"></p>
+    </div>
+  </div>
+</section>
+
+<section id="dests">
+  <h2>היעדים</h2>
+  <p class="sub">מחיר לאדם שנוסע לבד: טיסה, רכב, דלק, לינה, אטרקציות ואוכל. הטווח תלוי בעיקר ברמת הלינה. בשקלים, לפי שער תחילת אוקטובר.</p>
+  <div class="dests" id="destList"></div>
+</section>
+
+<section id="days">
+  <h2>יום אחר יום, במסלול המומלץ</h2>
+  <p class="sub">בוחרים יעד ורואים את חמשת הימים. 💧 מים · 🚲 אופניים · 🚡 רכבל.</p>
+  <div class="daysTabs" id="daysTabs"></div>
+  <div class="days" id="dayGrid"></div>
+</section>
+
+<section id="table">
+  <h2>הכל בטבלה אחת</h2>
+  <p class="sub">✔ ירוק = הכי טוב בשורה.</p>
+  <div class="tablewrap"><table id="cmp"></table></div>
+</section>
+
+<section id="notes">
+  <h2>לפני שמחליטים</h2>
+  <div class="two">
+    <div class="box">
+      <h3 style="margin-top:0">⏰ מה כדאי לסגור מהר</h3>
+      <ul class="tight">
+        <li><b>טיסה:</b> המחירים מהחיפוש של תחילת אוקטובר. שבועיים לפני הטיסה הם עולים.</li>
+        <li><b>רכב:</b> בכל היעדים צריך אישור בכתב להחזרה בלילה. בפולין ובאוחריד גם אישור לצאת מהמדינה.</li>
+        <li><b>רומניה:</b> את הכרטיס למקלט הדובים אפשר לקנות רק אונליין, 10 ימים מראש, כלומר ב-10.10.</li>
+        <li><b>רישיון נהיגה בינלאומי:</b> כדאי להוציא בכל מקרה. בפולין חובה.</li>
+      </ul>
+    </div>
+    <div class="box">
+      <h3 style="margin-top:0">⚖️ אם מתלבטים בין שניים</h3>
+      <ul class="tight">
+        <li><b>פולין או רומניה:</b> פולין זולה בכ-650 ₪ ונוחה יותר. רומניה נותנת יותר רכבלים ונוף פראי, עם יותר נהיגה ועם סיכון שהכביש ההררי ייסגר.</li>
+        <li><b>פולין או אוחריד:</b> בפולין יש הרים גבוהים. אוחריד היא בשביל אגם ורכיבה, ועולה כ-900 ₪ יותר.</li>
+        <li><b>רומניה או אוחריד:</b> הרים מול אגם. ברומניה יותר נוף מלמעלה, באוחריד יותר זמן על המים ועל האופניים.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+</main>
+<footer class="wrap">מחירים ושעות לאוקטובר 2026. הפירוט המלא, המפות, התחזית והמחשבונים נמצאים במסמך של כל יעד.</footer>
+
+<script>
+const T = u => `https://thumb.wikimedia.org/wikipedia/commons/thumb/${u}`;
+const D = [
+ {id:'pl',c:'var(--pl)',flag:'🇵🇱',name:'דרום פולין',sub:'טטרה, פייניני וקפיצה לסלובקיה',doc:'plan-poland-south.html',
+  one:'הרכבל ל-Lomnický, מורסקיה אוקו, רפסודות בקניון ואופניים לאורך הנהר.',
+  imgs:[
+   [T('d/df/Image-Lomnicky_stit_from_Slavkovsky_stit_2.jpg/960px-Image-Lomnicky_stit_from_Slavkovsky_stit_2.jpg'),'לומניצקי שטיט, 2,634 מ\''],
+   [T('4/4d/20181006_Morskie_Oko_0905_9902_DxO.jpg/960px-20181006_Morskie_Oko_0905_9902_DxO.jpg'),'מורסקיה אוקו'],
+   [T('5/5d/Rafting_on_the_Dunajec_River.jpg/960px-Rafting_on_the_Dunajec_River.jpg'),'רפסודות בדונאייץ'],
+   [T('c/c6/Dunajec_-_Droga_Pieninska_01.jpg/960px-Dunajec_-_Droga_Pieninska_01.jpg'),'אופניים בדרך הפיינינית']],
+  flight:{price:134,air:'ויז, ישיר',out:'11:05→13:50',back:'05:40→09:55',land:'09:55',ap:'קרקוב'},
+  total:[2951,4071],car:'≈ 375–504 ₪',km:570,
+  scores:{mount:5,water:4,bike:3,cable:4,price:5,drive:4,sure:4},
+  vars:[
+   {t:'A',n:'הקלאסי האוסטרי',d:'פסגה, אגם הרים, רפסודות, אופניים, טירה וקרקוב',km:570,b:[2951,4071],rec:1},
+   {t:'B',n:'אופניים ואגמים',d:'בסיס שקט ליד אגם, שני ימי אופניים, בלי פסגה גבוהה',km:520,b:[2696,3735]},
+   {t:'C',n:'רכבלים ופסגות',d:'3–4 רכבלים, בסיס אחד בזקופנה, הכי מעט הליכה',km:640,b:[3047,4204]}],
+  pros:['הכי זול: הטיסה והתקציב','הרכבל הכי גבוה מבין השלושה','נהיגה קצרה, פחות מ-1.5 שעות ביום'],
+  cons:['הרכבל ל-Kasprowy סגור בתאריכים','יום הסלובקיה ארוך','האופניים רק בחלק מהימים'],
+  days:[
+   ['א\' 18','נחיתה → זקופנה','ערב בקרופובקי וגובאלובקה','🚡'],
+   ['ב\' 19','יום סלובקיה: פסגה ואגם','רכבל ל-Lomnický, הליכה סביב שטרבסקה פלסו','🚡💧'],
+   ['ג\' 20','מורסקיה אוקו','הליכה לאגם, ובערב בריכות תרמיות','💧'],
+   ['ד\' 21','פייניני: נהר ואופניים','רפסודה בקניון, אופניים עד סלובקיה','💧🚲'],
+   ['ה\' 22','טירה → קרקוב','טירת ניידיצה מעל האגם, ערב בקרקוב','💧']]},
+ {id:'ro',c:'var(--ro)',flag:'🇷🇴',name:'טרנסילבניה',sub:'הקרפטים, טרנספגרשן ואגמי הרים',doc:'plan-romania.html',
+  one:'הכביש ההררי, אגם באליה, רכבל באבלה, אגם הלוע ואופניים חשמליים מבראן.',
+  imgs:[
+   [T('1/1f/Lake_B%C3%A2lea_and_the_Transf%C4%83g%C4%83r%C4%83%C5%9Fan_road.jpg/960px-Lake_B%C3%A2lea_and_the_Transf%C4%83g%C4%83r%C4%83%C5%9Fan_road.jpg'),'אגם באליה והכביש'],
+   [T('7/79/Panoram%C4%83_Transf%C4%83g%C4%83r%C4%83%C8%99an_%28Sibiu%29_DN7C.jpg/960px-Panoram%C4%83_Transf%C4%83g%C4%83r%C4%83%C8%99an_%28Sibiu%29_DN7C.jpg'),'טרנספגרשן'],
+   [T('c/c1/Lake_Vidraru%2C_Romania_%28Unsplash%29.jpg/960px-Lake_Vidraru%2C_Romania_%28Unsplash%29.jpg'),'אגם וידרארו'],
+   [T('5/58/Szent_Anna-t%C3%B3_%28panor%C3%A1mak%C3%A9p%29.jpg/960px-Szent_Anna-t%C3%B3_%28panor%C3%A1mak%C3%A9p%29.jpg'),'אגם הלוע סנטה אנה'],
+   [T('5/5a/Bucegi_-_Babele_%289372151700%29.jpg/960px-Bucegi_-_Babele_%289372151700%29.jpg'),'באבלה, רכבל בושטני'],
+   [T('d/da/20140628_Bran_Castle_03.jpg/960px-20140628_Bran_Castle_03.jpg'),'טירת בראן']],
+  flight:{price:173,air:'הייסקיי הלוך, ויז חזור, ישיר',out:'11:10→13:40',back:'05:45→08:25',land:'08:25',ap:'בוקרשט'},
+  total:[3625,4921],car:'≈ 700–1,190 ₪',km:890,
+  scores:{mount:5,water:4,bike:3,cable:5,price:4,drive:2,sure:3},
+  vars:[
+   {t:'A',n:'הקשת של טרנספגרשן',d:'הכביש ההררי ביום שני, באליה, דובים, אופניים חשמליים, סנטה אנה ובאבלה',km:890,b:[3625,4921],rec:1},
+   {t:'B',n:'אגמים ואופניים',d:'4 ימי רכיבה, פחות נהיגה, בלי תלות בכביש ההררי',km:620,b:[3507,4850]},
+   {t:'C',n:'רכבלים ופסגות',d:'5–6 רכבלים: באליה, פויאנה, באבלה וסינאיה',km:800,b:[3455,4829]}],
+  pros:['הכי הרבה הרים ורכבלים','נוף פראי ולא תיירותי','הכל זול על הקרקע'],
+  cons:['הכביש ההררי יכול להיסגר מ-20.10','רכבל באליה יוצא רק עם 10 אנשים','הכי הרבה נהיגה (~890 ק"מ)'],
+  days:[
+   ['א\' 18','נחיתה → ארג\'ש','שקיעה מעל אגם וידרארו','💧'],
+   ['ב\' 19','טרנספגרשן','מבצר פואנרי, סכר וידרארו, אגם באליה','💧🚡'],
+   ['ג\' 20','דובים ובראן','מקלט הדובים, אופניים חשמליים לערוץ זרנשט','🚲💧'],
+   ['ד\' 21','סנטה אנה ופויאנה','אגם בלוע הר געש, אופניים ורכבל טאמפה','💧🚲🚡'],
+   ['ה\' 22','באבלה → השדה','רכבל לפסגה ולספינקס, אופניים באגם פלטינו','🚡💧🚲']]},
+ {id:'oh',c:'var(--oh)',flag:'🇲🇰',name:'אגם אוחריד',sub:'מקדוניה הצפונית והחוף האלבני',doc:'plan-ohrid.html',
+  one:'רכיבה לגליצ\'יצה, קיאק, סירת משוטים על המעיינות, שני חופים ורכבל דאיטי.',
+  imgs:[
+   [T('a/a5/Lake-Ohrid-seen-from-Galichica-P1470065.jpg/960px-Lake-Ohrid-seen-from-Galichica-P1470065.jpg'),'האגם מגליצ\'יצה'],
+   [T('4/47/Lake_Ohrid_from_the_Monastery_of_St._Naum.jpg/960px-Lake_Ohrid_from_the_Monastery_of_St._Naum.jpg'),'סווטי נאום'],
+   [T('3/37/Drilon%2C_Pogradec_%289%29.jpg/960px-Drilon%2C_Pogradec_%289%29.jpg'),'מעיינות דרילון'],
+   [T('1/1b/Boat%2C_Kaneo_Beach.jpg/960px-Boat%2C_Kaneo_Beach.jpg'),'סירה בקנאו'],
+   [T('8/89/Dajti-Express-04.JPG/960px-Dajti-Express-04.JPG'),'רכבל דאיטי']],
+  flight:{price:432,air:'ישראייר, ישיר',out:'07:55→09:50',back:'01:40→05:25 (לילה ה\'–ו\')',land:'05:25',ap:'טירנה'},
+  total:[3832,5083],car:'≈ 650–1,170 ₪',km:450,
+  scores:{mount:3,water:5,bike:5,cable:2,price:2,drive:4,sure:3},
+  vars:[
+   {t:'A',n:'בסיס באוחריד',d:'גליצ\'יצה באופניים, קיאק, מעיינות, רכיבה לאלבניה, דאיטי',km:440,b:[3832,5083],rec:1},
+   {t:'B',n:'לולאת האגם באופניים',d:'כל האגם ביומיים (45 + 65 ק"מ), לילה בפוגרדץ',km:455,b:[3858,5041]},
+   {t:'C',n:'אגמים והרים',d:'מאברובו והכנסייה השקועה, פרספה, גליצ\'יצה',km:775,b:[3947,5572]}],
+  pros:['הכי הרבה רכיבה ומים','בסיס אחד, בלי לארוז כל יום','שתי מדינות בטיול אחד'],
+  cons:['הטיסה הכי יקרה ($432)','אין אונייה לסווטי נאום באוקטובר','היום האחרון נגמר ב-15:00'],
+  days:[
+   ['א\' 18','נחיתה → דאיטי → אוחריד','רכבל מעל טירנה, ונסיעה לאגם','🚡💧'],
+   ['ב\' 19','גליצ\'יצה וטרפייצה','רכיבה לנקודת התצפית, קיאק בכפר דייגים','🚲💧'],
+   ['ג\' 20','סווטי נאום ואלבניה','מפרץ העצמות, סירה על המעיינות, רכיבה לדרילון','💧🚲'],
+   ['ד\' 21','העיר העתיקה וווצ\'אני','סירה לקנאו, מעיינות, רכיבה בחוף הצפוני','💧🚲'],
+   ['ה\' 22','בוקר על המים → טירנה','רכיבה לפשטאני וטבילה, ב-15:00 לשדה','🚲💧']]}
+];
+
+/* theme */
+const tb=document.getElementById('themeBtn');
+tb.onclick=()=>{const r=document.documentElement;const dark=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches;r.dataset.theme=dark?'light':'dark';try{localStorage.setItem('idxTheme',r.dataset.theme)}catch(e){}};
+try{const t=localStorage.getItem('idxTheme');if(t)document.documentElement.dataset.theme=t}catch(e){}
+
+/* hero */
+document.getElementById('heroBgs').innerHTML=D.map(d=>`<div style="background-image:url('${d.imgs[0][0]}')"></div>`).join('');
+
+const fmt=n=>Math.round(n).toLocaleString('he-IL');
+const usdILS=3.065;
+
+/* picker */
+const P=[['mount','🏔️ הרים'],['water','💧 מים'],['bike','🚲 אופניים'],['cable','🚡 רכבלים'],['price','💰 מחיר'],['drive','🚗 מעט נהיגה'],['sure','✅ ודאות']];
+const PRE={'מאוזן':{mount:3,water:3,bike:3,cable:3,price:3,drive:2,sure:2},'כמו אוסטריה':{mount:5,water:4,bike:2,cable:5,price:2,drive:1,sure:2},'הכי זול':{mount:2,water:2,bike:2,cable:2,price:5,drive:2,sure:3},'רכיבה ואגם':{mount:1,water:5,bike:5,cable:1,price:2,drive:2,sure:2}};
+let W={...PRE['מאוזן']};
+const prio=document.getElementById('prio');
+prio.innerHTML=P.map(([k,l])=>`<div class="row"><label for="w-${k}">${l}</label><input type="range" id="w-${k}" min="0" max="5" value="${W[k]}"><output id="o-${k}">${W[k]}</output></div>`).join('');
+P.forEach(([k])=>document.getElementById('w-'+k).oninput=e=>{W[k]=+e.target.value;document.getElementById('o-'+k).textContent=W[k];document.querySelectorAll('#presets .btn').forEach(b=>b.classList.remove('on'));rank()});
+const pr=document.getElementById('presets');
+pr.innerHTML=Object.keys(PRE).map((k,i)=>`<button class="btn ${i?'':'on'}" data-p="${k}">${k}</button>`).join('');
+pr.onclick=e=>{const k=e.target.dataset.p;if(!k)return;W={...PRE[k]};P.forEach(([x])=>{document.getElementById('w-'+x).value=W[x];document.getElementById('o-'+x).textContent=W[x]});pr.querySelectorAll('.btn').forEach(b=>b.classList.toggle('on',b.dataset.p===k));rank()};
+function rank(){
+  const tw=Object.values(W).reduce((a,b)=>a+b,0)||1;
+  const r=D.map(d=>{const s=P.reduce((a,[k])=>a+W[k]*d.scores[k],0)/tw;return {d,s:s/5*100}}).sort((a,b)=>b.s-a.s);
+  document.getElementById('rank').innerHTML=r.map((x,i)=>`<a href="#d-${x.d.id}" class="rk ${i?'':'first'}" style="--c:${x.d.c};text-decoration:none;color:inherit"><span class="n">${i+1}</span><div><b>${x.d.flag} ${x.d.name}</b><div class="bar"><i style="width:${x.s.toFixed(0)}%"></i></div></div><span class="sc">${x.s.toFixed(0)}</span></a>`).join('');
+  const top=r[0].d, best=P.filter(([k])=>W[k]>=3).sort((a,b)=>top.scores[b[0]]-top.scores[a[0]]).slice(0,2).map(([,l])=>l.replace(/^\S+ /,''));
+  document.getElementById('rankWhy').textContent=`לפי מה שבחרת: ${top.name}${best.length?`, בעיקר בזכות ${best.join(' ו')}`:''}.${r[1].s>r[0].s-4?` ${r[1].d.name} כמעט באותה רמה.`:''}`;
+}
+rank();
+
+/* destination cards */
+const stars=n=>`<span class="st">${[1,2,3,4,5].map(i=>`<i class="${i<=n?'f':''}"></i>`).join('')}</span>`;
+document.getElementById('destList').innerHTML=D.map(d=>`
+<article class="dest" id="d-${d.id}" style="--c:${d.c}">
+  <div class="media" data-id="${d.id}">
+    ${d.imgs.map((m,i)=>`<img src="${m[0]}" alt="${m[1]}" loading="lazy" class="${i?'':'on'}">`).join('')}
+    <div class="dots">${d.imgs.map((m,i)=>`<button aria-label="${m[1]}" data-i="${i}" class="${i?'':'on'}"></button>`).join('')}</div>
+    <button class="nav prev" data-d="-1" aria-label="הקודמת">›</button><button class="nav next" data-d="1" aria-label="הבאה">‹</button>
+    <div class="cap">${d.imgs[0][1]}</div>
+  </div>
+  <div class="body">
+    <div class="dhead"><span class="flag">${d.flag}</span><h3>${d.name}</h3><span class="one">${d.sub}</span></div>
+    <div class="price">
+      <div class="p main"><small>סה"כ לטיול (מסלול A)</small><b>${fmt(d.total[0])}–${fmt(d.total[1])} ₪</b></div>
+      <div class="p"><small>טיסה הלוך-חזור</small><b>$${d.flight.price}</b> <span style="color:var(--mute);font-size:.85rem">≈ ${fmt(d.flight.price*usdILS)} ₪</span></div>
+      <div class="p"><small>רכב ל-5 ימים</small><b>${d.car}</b></div>
+    </div>
+    <div class="flight">✈️ ${d.flight.ap} · ${d.flight.air} · הלוך ${d.flight.out} · חזור ${d.flight.back} <span class="badge ok">🕯️ נוחתים בשישי ב-${d.flight.land}</span></div>
+    <div class="scores">${[['mount','🏔️ הרים'],['water','💧 מים'],['bike','🚲 אופניים'],['cable','🚡 רכבלים']].map(([k,l])=>`<div class="score">${l}${stars(d.scores[k])}</div>`).join('')}</div>
+    <div class="vars">${d.vars.map(v=>`<div class="var ${v.rec?'rec':''}"><span class="t">${v.t}</span><div class="nm">${v.n}${v.rec?' ⭐':''}<small>${v.d}</small></div><div class="bd">${fmt(v.b[0])}–${fmt(v.b[1])} ₪<small>~${v.km} ק"מ נהיגה</small></div></div>`).join('')}</div>
+    <div class="pc">
+      <div><h4>👍 חזק ב</h4><ul>${d.pros.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+      <div><h4>👀 שים לב</h4><ul>${d.cons.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+    </div>
+    <a class="full" href="${d.doc}">למסמך המלא: מפה, תחזית, תקציב ←</a>
+  </div>
+</article>`).join('');
+
+/* carousels */
+const idx={};
+function show(id,i){const m=document.querySelector(`.media[data-id="${id}"]`),d=D.find(x=>x.id===id),n=d.imgs.length;i=(i+n)%n;idx[id]=i;
+  m.querySelectorAll('img').forEach((im,j)=>im.classList.toggle('on',j===i));m.querySelectorAll('.dots button').forEach((b,j)=>b.classList.toggle('on',j===i));m.querySelector('.cap').textContent=d.imgs[i][1]}
+document.querySelectorAll('.media').forEach(m=>{const id=m.dataset.id;idx[id]=0;
+  m.onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.i!=null)show(id,+b.dataset.i);else if(b.dataset.d)show(id,idx[id]+ +b.dataset.d)};
+  let x0=null;m.addEventListener('touchstart',e=>x0=e.touches[0].clientX,{passive:true});
+  m.addEventListener('touchend',e=>{if(x0==null)return;const dx=e.changedTouches[0].clientX-x0;if(Math.abs(dx)>40)show(id,idx[id]+(dx>0?1:-1));x0=null});
+});
+
+/* days */
+const dt=document.getElementById('daysTabs');let curD='pl';
+dt.innerHTML=D.map(d=>`<button class="btn" data-d="${d.id}">${d.flag} ${d.name}</button>`).join('');
+function renderDays(){const d=D.find(x=>x.id===curD);dt.querySelectorAll('.btn').forEach(b=>b.classList.toggle('on',b.dataset.d===curD));
+  document.getElementById('dayGrid').innerHTML=d.days.map(x=>`<div class="day" style="--c:${d.c}"><div class="d">${x[0]}.10 · ${x[3]}</div><div class="h">${x[1]}</div><div class="ic">${x[2]}</div></div>`).join('')}
+dt.onclick=e=>{const id=e.target.closest('.btn')?.dataset.d;if(!id)return;curD=id;renderDays()};renderDays();
+
+/* comparison table */
+const rows=[
+ ['✈️ טיסה',d=>d.flight.price,v=>`$${v}`,'min'],
+ ['🕯️ נחיתה בשישי',d=>d.flight.land,v=>v,null],
+ ['💰 סה"כ, מסלול A',d=>d.total[0],(v,d)=>`${fmt(d.total[0])}–${fmt(d.total[1])} ₪`,'min'],
+ ['💰 המסלול הזול',d=>Math.min(...d.vars.map(v=>v.b[0])),(v,d)=>{const x=d.vars.reduce((a,b)=>b.b[0]<a.b[0]?b:a);return `${fmt(x.b[0])}–${fmt(x.b[1])} ₪ (${x.t})`},'min'],
+ ['🚗 נהיגה, מסלול A',d=>d.km,v=>`~${v} ק"מ`,'min'],
+ ['🏔️ הרים',d=>d.scores.mount,v=>'★'.repeat(v),'max'],
+ ['💧 מים',d=>d.scores.water,v=>'★'.repeat(v),'max'],
+ ['🚲 אופניים',d=>d.scores.bike,v=>'★'.repeat(v),'max'],
+ ['🚡 רכבלים',d=>d.scores.cable,v=>'★'.repeat(v),'max'],
+ ['⭐ רגע השיא',d=>0,(v,d)=>({pl:'רכבל לפסגת Lomnický',ro:'הכביש ההררי ואגם באליה',oh:'רכיבה לאורך האגם'})[d.id],null],
+ ['⚠️ הסיכון העיקרי',d=>0,(v,d)=>d.cons[0],null]];
+document.getElementById('cmp').innerHTML=`<tr><th></th>${D.map(d=>`<th style="color:${d.c}">${d.flag} ${d.name}</th>`).join('')}</tr>`+
+ rows.map(([l,f,fm,best])=>{const vals=D.map(f);const bv=best==='min'?Math.min(...vals):best==='max'?Math.max(...vals):null;
+  return `<tr><td class="k">${l}</td>${D.map((d,i)=>`<td>${best&&vals[i]===bv?'<span class="w">✔ </span>':''}${fm(vals[i],d)}</td>`).join('')}</tr>`}).join('');
+</script>
+</body>
+</html>
