@@ -151,6 +151,18 @@ footer{padding:30px 0;color:var(--mute);font-size:.85rem}
   .hero .bgs div:not(:first-child){display:none}
 }
 </style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+#euMap{height:520px;border-radius:14px;border:1px solid var(--line);box-shadow:var(--shadow);background:#cfd8dc}
+.mapLegend{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.mapLegend button{display:inline-flex;align-items:center;gap:6px}
+.mapLegend i{width:12px;height:12px;border-radius:50%;background:var(--c);display:inline-block}
+.leaflet-container{font-family:Heebo,system-ui,sans-serif}
+.rlab{background:none;border:0;box-shadow:none;font-weight:800;font-size:13px;color:#fff;text-shadow:0 0 3px #000,0 0 6px #000;white-space:nowrap}
+.rlab:before{display:none}
+@media (max-width:560px){#euMap{height:400px}}
+</style>
 </head>
 <body>
 
@@ -169,7 +181,7 @@ footer{padding:30px 0;color:var(--mute);font-size:.85rem}
 </header>
 
 <nav class="top"><div class="wrap">
-  <a href="#verdict">השורה התחתונה</a><a href="#picker">מה חשוב לך</a><a href="#dests">היעדים</a><a href="#days">יום אחר יום</a><a href="#table">טבלה</a><a href="#notes">לפני שמחליטים</a>
+  <a href="#verdict">השורה התחתונה</a><a href="#euro">מפה</a><a href="#picker">מה חשוב לך</a><a href="#dests">היעדים</a><a href="#days">יום אחר יום</a><a href="#table">טבלה</a><a href="#notes">לפני שמחליטים</a>
   <button id="themeBtn" aria-label="מצב תצוגה">☀️ / 🌙</button>
 </div></nav>
 
@@ -198,6 +210,13 @@ footer{padding:30px 0;color:var(--mute);font-size:.85rem}
       <a class="go" href="#d-oh" style="color:var(--oh)">לפרטים ←</a>
     </div>
   </div>
+</section>
+
+<section id="euro">
+  <h2>🗺️ איפה זה באירופה</h2>
+  <p class="sub">שלושת האזורים, שעתיים וחצי עד שלוש שעות טיסה מתל אביב. לחיצה על אזור פותחת את הפרטים.</p>
+  <div id="euMap" dir="ltr"></div>
+  <div class="mapLegend" id="mapLegend"></div>
 </section>
 
 <section id="picker">
@@ -401,6 +420,37 @@ document.querySelectorAll('.media').forEach(m=>{const id=m.dataset.id;idx[id]=0;
   let x0=null;m.addEventListener('touchstart',e=>x0=e.touches[0].clientX,{passive:true});
   m.addEventListener('touchend',e=>{if(x0==null)return;const dx=e.changedTouches[0].clientX-x0;if(Math.abs(dx)>40)show(id,idx[id]+(dx>0?1:-1));x0=null});
 });
+
+/* europe map */
+(function(){
+  if(!window.L) return;
+  const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+  const R={
+    pl:{ap:[50.0777,19.7848],apn:'קרקוב',lab:[49.30,20.15],area:[[49.95,19.75],[49.62,20.70],[49.20,20.75],[49.05,20.10],[49.15,19.70],[49.55,19.55]],tt:'טטרה ופייניני'},
+    ro:{ap:[44.5711,26.0850],apn:'בוקרשט',lab:[45.55,25.10],area:[[45.85,24.15],[46.25,25.95],[45.75,26.05],[45.15,25.75],[45.05,24.55],[45.35,24.05]],tt:'הקרפטים וטרנספגרשן'},
+    oh:{ap:[41.4147,19.7206],apn:'טירנה',lab:[40.95,20.75],area:[[41.45,19.75],[41.75,20.90],[41.35,21.15],[40.75,21.05],[40.70,20.55],[41.05,20.05]],tt:'אגם אוחריד ופרספה'}};
+  const TLV=[32.0114,34.8867];
+  const map=L.map('euMap',{scrollWheelZoom:false,zoomSnap:.25,attributionControl:true});
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:12,attribution:'Esri'}).addTo(map);
+  const arc=(a,b)=>{const pts=[];const mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2,dx=b[1]-a[1],dy=b[0]-a[0];const k=.18;const c=[mx+dx*k,my-dy*k];
+    for(let t=0;t<=1.0001;t+=.04){pts.push([(1-t)*(1-t)*a[0]+2*(1-t)*t*c[0]+t*t*b[0],(1-t)*(1-t)*a[1]+2*(1-t)*t*c[1]+t*t*b[1]])}return pts};
+  const groups={},all=[TLV];
+  L.circleMarker(TLV,{radius:7,color:'#fff',weight:2,fillColor:'#333',fillOpacity:1}).addTo(map).bindTooltip('✈️ תל אביב',{permanent:true,direction:'left',className:'rlab'});
+  D.forEach(d=>{const r=R[d.id],c=css('--'+d.id)||'#c33';const g=L.layerGroup().addTo(map);groups[d.id]=g;
+    const poly=L.polygon(r.area,{color:c,weight:3,fillColor:c,fillOpacity:.35}).addTo(g);
+    L.polyline(arc(TLV,r.ap),{color:c,weight:2.5,dashArray:'6 6',opacity:.9}).addTo(g);
+    L.circleMarker(r.ap,{radius:5,color:'#fff',weight:2,fillColor:c,fillOpacity:1}).addTo(g).bindTooltip(`✈️ ${r.apn}`,{direction:'top'});
+    L.marker(r.lab,{opacity:0,interactive:false}).addTo(g).bindTooltip(`${d.flag} ${d.name}`,{permanent:true,direction:'center',className:'rlab'});
+    const html=`<div dir="rtl" style="min-width:210px"><b style="font-size:1.05rem">${d.flag} ${d.name}</b><br><span style="color:#666">${r.tt}</span><br>✈️ ${r.apn} · $${d.flight.price} · נוחתים בשישי ${d.flight.land}<br>💰 ${fmt(d.total[0])}–${fmt(d.total[1])} ₪ (מסלול A)<br><img src="${d.imgs[0][0]}" style="width:100%;border-radius:8px;margin-top:6px"><br><a href="#d-${d.id}">← לפרטים</a> · <a href="${d.doc}">למסמך המלא</a></div>`;
+    poly.bindPopup(html,{maxWidth:260});
+    all.push(r.ap,...r.area);});
+  const fit=()=>map.fitBounds(all,{paddingTopLeft:[30,50],paddingBottomRight:[30,30]});fit();
+  document.getElementById('mapLegend').innerHTML=D.map(d=>`<button class="btn on" data-m="${d.id}" style="--c:var(--${d.id})"><i></i>${d.flag} ${d.name}</button>`).join('')+'<button class="btn" data-m="fit">🔭 הכל</button>';
+  document.getElementById('mapLegend').onclick=e=>{const b=e.target.closest('button');if(!b)return;const id=b.dataset.m;
+    if(id==='fit'){fit();return}
+    const g=groups[id];if(map.hasLayer(g)){map.removeLayer(g);b.classList.remove('on')}else{g.addTo(map);b.classList.add('on')}};
+  setTimeout(()=>{map.invalidateSize();fit()},300);
+})();
 
 /* days */
 const dt=document.getElementById('daysTabs');let curD='pl';
